@@ -1,10 +1,10 @@
-#Minecraft Server File Specification
+# Minecraft Server File Specification
 
-##What is this?
+## What is this?
 This is the specification for a File that is supposed to be distributed together or seperated from the modpack.
 It is supposed to be used by server launchers (_like this one_) to know what it is supposed to do.
 
-##Why?
+## Why?
 You might ask, why not just throw the client files next to a forge installer and then call it a day?
 You are correct, you can do this if you set it up on your local server, but that is a lot of manual labor.
 
@@ -16,5 +16,5 @@ But it allows for more:
     A parser could be written for any other utility program to take care of the special problems specified in the file.      
 * With the use of wildcard options and regex selectors it could be made to even work across modpack versions.
 
-##Format
+## Format
 See `server-setup-config.yaml` for a example file how this file should be layouted.
