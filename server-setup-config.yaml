@@ -1,0 +1,98 @@
+# Version of the specs, only for internal usage if this format should ever change
+_specver: 1
+
+# modpack related settings, changes the supposed to change the visual appearance of the launcher
+modpack:
+  # Name of the mod pack, that is displayed in various places where it fits
+  name: Example Modpack
+
+  # Description
+  description: This is a awesome modpack about making examples.
+
+
+
+# settings regarding the installation of the modpack
+install:
+  # version of minecraft, needs the exact version
+  mcVersion: 1.12.2
+
+  # exact version of forge that is supposed to be used
+  # if this value is a null value so ( ~, null, or "" ) then the version from the mod pack is going to be used
+  forgeVersion: 12.18.3.2281
+
+  # If a custom installer is supposed to used, specify the url here: (Otherwise put "", ~ or null here)
+  forgeInstallerUrl: ~
+
+  # Link to where the file where the modpack can be distributed
+  modpackUrl: https://minecraft.curseforge.com/projects/all-the-mods-3/files/2556240
+
+  # This is used to specify in which format the modpack is distributed, the server launcher has to handle each individually if their format differs
+  modpackFormat: curseforge
+
+  # a list of files which are supposed to be ignored when installing it from the client files
+  # this is supposed to support regex
+  ignoreFiles:
+    - ./mods/optifine.*.jar
+    - ./resources/**
+
+  # often a server needs more files, which are nearly useless on the client, such as tickprofiler
+  # This is a list of files, each ' - ' is a new file:
+  # url is the directlink to the file, destination is the path to where the file should be copied to
+  # use {filename} as a selector for the filename, or give it a filename if you want to overwrite the name
+  additionalFiles:
+    - url: https://minecraft.curseforge.com/projects/tickprofiler/files/2536494/download
+      destination: ./mods/{filename}
+    - url: https://minecraft.curseforge.com/projects/blooddebug/files/2514858/download
+      destination: ./mods/{filename}
+
+  # For often there are config which the user wants to change, here is the place to put the local path to configs, jars or whatever
+  localFiles:
+    - from: ../custommods/discord-chat.jar
+      to: ./mods/{filename}
+
+  # This makes the program check the folder for whether it is supposed to use the
+  checkFolder: yes
+
+
+
+
+# settings regarding the launching of the pack
+launch:
+  # applies the launch wrapper to fix sponge for a few mods
+  spongefix: no
+
+  # checks with the help of a few unrelated server whether the server is online
+  checkOffline: yes
+
+  # specifies the max amount of ram the server is supposed to launch with
+  maxRam: 5G
+
+  # specifies whether the server is supposed to auto restart after crash
+  autoRestart: yes
+
+  # after a given amount of crashes in a given time the server will stop auto restarting
+  crashLimit: 10
+
+  # Time a crash should be still accounted for in the {crashLimit}
+  # syntax is either [number]h or [number]min or [number]s
+  crashTimer: 60min
+
+  # Java args that are supposed to be used when the server launches
+  # keep in mind java args often need ' - ' in front of it to work, use clarifying parentheses to make sure it uses it correctly
+  javaArgs:
+    - "-d64"
+    - "-server"
+    - "-XX:+AggressiveOpts"
+    - "-XX:ParallelGCThreads=3"
+    - "-XX:+UseConcMarkSweepGC"
+    - "-XX:+UnlockExperimentalVMOptions"
+    - "-XX:+UseParNewGC"
+    - "-XX:+ExplicitGCInvokesConcurrent"
+    - "-XX:MaxGCPauseMillis=10"
+    - "-XX:GCPauseIntervalMillis=50"
+    - "-XX:+UseFastAccessorMethods"
+    - "-XX:+OptimizeStringConcat"
+    - "-XX:NewSize=84m"
+    - "-XX:+UseAdaptiveGCBoundary"
+    - "-XX:NewRatio=3"
+    - "-Dfml.readTimeout=90"
