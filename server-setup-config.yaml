@@ -29,6 +29,10 @@ install:
   # This is used to specify in which format the modpack is distributed, the server launcher has to handle each individually if their format differs
   modpackFormat: curseforge
 
+  # Settings which are specific to the format used, might not be needed in some casese
+  formatSpecific: ~
+
+
   # a list of files which are supposed to be ignored when installing it from the client files
   # this is supposed to support regex
   ignoreFiles:

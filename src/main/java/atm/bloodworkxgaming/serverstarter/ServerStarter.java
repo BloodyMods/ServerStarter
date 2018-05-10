@@ -1,6 +1,8 @@
 package atm.bloodworkxgaming.serverstarter;
 
 import atm.bloodworkxgaming.serverstarter.config.ConfigFile;
+import atm.bloodworkxgaming.serverstarter.packtype.IPackType;
+import atm.bloodworkxgaming.serverstarter.packtype.TypeFactory;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
@@ -23,8 +25,15 @@ public class ServerStarter {
 
         Yaml yaml = new Yaml(constructor);
         try {
-            ConfigFile obj = yaml.load(new FileInputStream(new File("D:\\Users\\jonas\\Documents\\GitHub\\serverstarter\\server-setup-atm.bloodworkxgaming.serverstarter.config.yaml")));
+            ConfigFile obj = yaml.load(new FileInputStream(new File("D:\\Users\\jonas\\Documents\\GitHub\\serverstarter\\server-setup-config.yaml")));
             System.out.println("obj = " + obj);
+
+            IPackType packtype = TypeFactory.createPackType(obj.install.modpackFormat);
+            if (packtype != null)
+                packtype.handleConfig(obj);
+            else
+                System.out.println("Unknown pack format given in config");
+
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
