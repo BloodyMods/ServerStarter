@@ -1,4 +1,6 @@
-import config.ConfigFile;
+package atm.bloodworkxgaming.serverstarter;
+
+import atm.bloodworkxgaming.serverstarter.config.ConfigFile;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
@@ -21,7 +23,7 @@ public class ServerStarter {
 
         Yaml yaml = new Yaml(constructor);
         try {
-            ConfigFile obj = yaml.load(new FileInputStream(new File("D:\\Users\\jonas\\Documents\\GitHub\\serverstarter\\server-setup-config.yaml")));
+            ConfigFile obj = yaml.load(new FileInputStream(new File("D:\\Users\\jonas\\Documents\\GitHub\\serverstarter\\server-setup-atm.bloodworkxgaming.serverstarter.config.yaml")));
             System.out.println("obj = " + obj);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
