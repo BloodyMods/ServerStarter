@@ -1,5 +1,6 @@
 package atm.bloodworkxgaming.serverstarter.packtype;
 
+import atm.bloodworkxgaming.serverstarter.config.ConfigFile;
 import atm.bloodworkxgaming.serverstarter.packtype.curse.CursePackType;
 
 import java.util.HashMap;
@@ -12,9 +13,9 @@ public class TypeFactory {
         registerPackType("curseforge", CursePackType::new);
     }
 
-    public static IPackType createPackType(String packTypeName) {
+    public static IPackType createPackType(String packTypeName, ConfigFile configFile) {
         IPackTypeFactory fact = packtype.get(packTypeName);
-        return fact == null ? null : fact.createPackType();
+        return fact == null ? null : fact.createPackType(configFile);
     }
 
     public static void registerPackType(String name, IPackTypeFactory type) {

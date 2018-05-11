@@ -16,6 +16,7 @@ public class InstallConfig {
     public String modpackFormat;
     public HashMap<String, String> formatSpecific;
 
+    public String baseInstallPath;
     public List<String> ignoreFiles;
     public List<AddionalFile> additionalFiles;
     public List<LocalFile> localFiles;

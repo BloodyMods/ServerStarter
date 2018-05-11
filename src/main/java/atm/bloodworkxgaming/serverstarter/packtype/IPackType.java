@@ -1,7 +1,5 @@
 package atm.bloodworkxgaming.serverstarter.packtype;
 
-import atm.bloodworkxgaming.serverstarter.config.ConfigFile;
-
 public interface IPackType {
-    void handleConfig(ConfigFile configFile);
+    void installPack();
 }

@@ -32,6 +32,8 @@ install:
   # Settings which are specific to the format used, might not be needed in some casese
   formatSpecific: ~
 
+  # The base path where the server should be installed to, ~ for current path
+  baseInstallPath: setup/
 
   # a list of files which are supposed to be ignored when installing it from the client files
   # this is supposed to support regex
