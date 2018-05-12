@@ -23,4 +23,7 @@ public class InstallConfig {
 
     public boolean checkFolder;
 
+    public String getFormatSpecificSettingOrDefault(String name, String fallback) {
+        return formatSpecific == null ? fallback : formatSpecific.getOrDefault(name, fallback);
+    }
 }
