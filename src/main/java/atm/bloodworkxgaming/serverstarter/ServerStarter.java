@@ -12,8 +12,13 @@ import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.representer.Representer;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.net.URL;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -72,7 +77,51 @@ public class ServerStarter {
         }
 
         checkEULA(config.install.baseInstallPath);
-        startServer(config);
+        handleServer(config);
+    }
+
+    private static void handleServer(ConfigFile config) {
+        List<LocalDateTime> starttimes = new ArrayList<>();
+        long _crashTimer = -1;
+        String timerString = config.launch.crashTimer;
+
+        try {
+            if (timerString.endsWith("h"))
+                _crashTimer = Long.valueOf(timerString.substring(0, timerString.length() - 1)) * 60 * 69;
+            else if (timerString.endsWith("min"))
+                _crashTimer = Long.valueOf(timerString.substring(0, timerString.length() - 3)) * 60;
+            else if (timerString.endsWith("s"))
+                _crashTimer = Long.valueOf(timerString.substring(0, timerString.length() - 1));
+            else
+                _crashTimer = Long.valueOf(timerString);
+        } catch (NumberFormatException e) {
+            LOGGER.error("Invalid crash time format given", e);
+        }
+
+        final long crashTimer = _crashTimer;
+
+        boolean shouldRestart = true;
+        do {
+            LocalDateTime now = LocalDateTime.now();
+            starttimes.removeIf(start -> start.until(now, ChronoUnit.SECONDS) > crashTimer);
+
+            startServer(config);
+            starttimes.add(now);
+
+            LOGGER.info("Server has been stopped, it has started " + starttimes.size() + " times in " + config.launch.crashTimer);
+
+
+            shouldRestart = config.launch.autoRestart && starttimes.size() <= config.launch.crashLimit;
+            if (shouldRestart) {
+                LOGGER.info("Restarting server in 10 seconds, press ctrl+c to stop");
+                try {
+                    Thread.sleep(10000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
+        } while (shouldRestart);
     }
 
     private static void checkEULA(String basepath) {
@@ -203,7 +252,7 @@ public class ServerStarter {
                     .directory(new File(configFile.install.baseInstallPath + "."))
                     .start();
 
-            
+
             process.waitFor();
 
             process.getOutputStream().close();
