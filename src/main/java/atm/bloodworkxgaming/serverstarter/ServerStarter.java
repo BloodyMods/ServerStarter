@@ -10,14 +10,10 @@ import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.nodes.Tag;
+import org.yaml.snakeyaml.reader.StreamReader;
 import org.yaml.snakeyaml.representer.Representer;
-import sun.misc.Signal;
-import sun.misc.SignalHandler;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -203,86 +199,44 @@ public class ServerStarter {
 
             LOGGER.info("Starting Forge, output incoming");
             LOGGER.info("For output of this check the server log", true);
-            Process installer = new ProcessBuilder(arguments)
+            Process process = new ProcessBuilder(arguments)
                     .inheritIO()
-                    .redirectOutput(ProcessBuilder.Redirect.PIPE)
+                    .redirectInput(ProcessBuilder.Redirect.PIPE)
                     .directory(new File(configFile.install.baseInstallPath + "."))
                     .start();
 
 
-
-            installer.getOutputStream();
+            process.getOutputStream();
 
             Thread inThread = new Thread(() -> {
                 Scanner scanner = new Scanner(System.in);
+                System.out.println("scanner.delimiter() = " + scanner.delimiter());
+                Reader reader = new InputStreamReader(System.in);
+                reader.read()
 
-                try {
-                    installer.getOutputStream().write(scanner.nextByte());
-                    installer.getOutputStream().flush();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                while (scanner.hasNext() && process.isAlive())
+                    try {
+                        String b = scanner.next() + "\n";
+                        LOGGER.info("byte: " + b);
+                        process.getOutputStream().write(b.getBytes());
+                        process.getOutputStream().flush();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
             });
 
             inThread.start();
 
-            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                LOGGER.info("Shutdown cook called");
-            }));
 
-            installer.waitFor();
+            process.waitFor();
 
 
-
-
-
-
-
-            installer.getOutputStream().close();
-            installer.getErrorStream().close();
-            installer.getInputStream().close();
+            process.getOutputStream().close();
+            process.getErrorStream().close();
+            process.getInputStream().close();
 
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
     }
-
-
-    static class DiagSignalHandler implements SignalHandler {
-        private SignalHandler oldHandler;
-
-        // Static method to install the signal handler
-        public static DiagSignalHandler install(String signalName) {
-            Signal diagSignal = new Signal(signalName);
-            DiagSignalHandler diagHandler = new DiagSignalHandler();
-            diagHandler.oldHandler = Signal.handle(diagSignal, diagHandler);
-
-            return diagHandler;
-        }
-
-        @Override
-        public void handle(Signal sig) {
-            LOGGER.info("Diagnostic Signal handler called for signal " + sig);
-            try {
-
-                // Output information for each thread
-                Thread[] threadArray = new Thread[Thread.activeCount()];
-                int numThreads = Thread.enumerate(threadArray);
-                LOGGER.info("Current threads:");
-                for (int i = 0; i < numThreads; i++) {
-                    LOGGER.info(" " + threadArray[i]);
-                }
-
-                // Chain back to previous handler, if one exists
-                if (oldHandler != SIG_DFL && oldHandler != SIG_IGN) {
-                    oldHandler.handle(sig);
-                }
-            } catch (Exception e) {
-                LOGGER.info("Signal handler failed, reason " + e);
-            }
-
-        }
-    }
-
-
 }
