@@ -15,9 +15,14 @@ import lombok.Getter;
 import lombok.ToString;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.utils.URIBuilder;
 
 import java.io.*;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -111,6 +116,7 @@ public class CursePackType implements IPackType {
                     if (!name.endsWith("/")) {
                         File outfile = new File(basePath + entry.getName().substring(10));
                         System.out.println("outfile = " + outfile);
+                        //noinspection ResultOfMethodCallIgnored
                         new File(outfile.getParent()).mkdirs();
 
                         try (FileOutputStream fos = new FileOutputStream(outfile)) {
@@ -217,19 +223,43 @@ public class CursePackType implements IPackType {
         }
     }
 
-    void processMods(List<String> mods) {
+    private void processMods(List<String> mods) {
         AtomicInteger count = new AtomicInteger(0);
         int totalCount = mods.size();
+        List<String> fallbackList = new ArrayList<>();
 
-        mods.stream().parallel().forEach(s -> {
-            try {
-                String modName = FilenameUtils.getName(s);
-                FileUtils.copyURLToFile(new URL(s), new File(basePath + "mods/" + modName));
-                System.out.println("[" + count.incrementAndGet() + "/" + totalCount + "] Downloaded mod: " + modName);
-            } catch (IOException e) {
-                e.printStackTrace();
+        mods.stream().parallel().forEach(s -> processSingleMod(s, count, totalCount, fallbackList));
+        // mods.forEach(s -> processSingleMod(s, count, totalCount, fallbackList));
+
+        List<String> secondFail = new ArrayList<>();
+        fallbackList.forEach(s -> processSingleMod(s, count, totalCount, secondFail));
+
+        if (!secondFail.isEmpty()) {
+            System.out.println("Failed to download (a) mod(s):");
+            for (String s : secondFail) {
+                System.out.println("\t" + s);
             }
-        });
+
+        }
+
+    }
+
+    private void processSingleMod(String mod, AtomicInteger counter, int totalCount, List<String> fallbackList) {
+        try {
+            String modName = FilenameUtils.getName(mod);
+            URI uri = new URI("https", "files.forgecdn.net", mod.substring(26), null);
+
+            FileUtils.copyURLToFile(
+                    //new URL(uri.toASCIIString()),
+                    uri.toURL(),
+                    new File(basePath + "mods/" + modName));
+            System.out.println("[" + counter.incrementAndGet() + "/" + totalCount + "] Downloaded mod: " + modName);
+        } catch (IOException e) {
+            fallbackList.add(mod);
+            e.printStackTrace();
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
     }
 
     @AllArgsConstructor
