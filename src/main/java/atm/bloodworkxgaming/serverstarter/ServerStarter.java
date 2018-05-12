@@ -2,6 +2,7 @@ package atm.bloodworkxgaming.serverstarter;
 
 import atm.bloodworkxgaming.serverstarter.config.ConfigFile;
 import atm.bloodworkxgaming.serverstarter.config.LockFile;
+import atm.bloodworkxgaming.serverstarter.logger.PrimitiveLogger;
 import atm.bloodworkxgaming.serverstarter.packtype.IPackType;
 import atm.bloodworkxgaming.serverstarter.packtype.TypeFactory;
 import org.apache.commons.io.FileUtils;
@@ -16,20 +17,23 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 
 public class ServerStarter {
     private static Representer rep;
     private static DumperOptions options;
     public static LockFile lockFile = null;
+    public static final PrimitiveLogger LOGGER = new PrimitiveLogger(new File("serverstarter.log"));
 
     static {
         rep = new Representer();
         options = new DumperOptions();
         rep.addClassTag(ConfigFile.class, Tag.MAP);
         rep.addClassTag(LockFile.class, Tag.MAP);
-        options.setDefaultFlowStyle(DumperOptions.FlowStyle.AUTO);
+        options.setDefaultFlowStyle(DumperOptions.FlowStyle.FLOW);
     }
 
     public static void main(String[] args) {
@@ -37,7 +41,7 @@ public class ServerStarter {
         lockFile = readLockFile();
 
         if (config == null || lockFile == null) {
-            System.err.println("[Error] One file is null: config: " + config + " lock: " + lockFile);
+            LOGGER.error("One file is null: config: " + config + " lock: " + lockFile);
             return;
         }
 
@@ -45,17 +49,18 @@ public class ServerStarter {
         if (config.install.baseInstallPath == null) config.install.baseInstallPath = "";
 
 
-        if (checkShouldInstall(config)) {
+        if (lockFile.checkShouldInstall(config)) {
             IPackType packtype = TypeFactory.createPackType(config.install.modpackFormat, config);
             if (packtype == null) {
-                System.out.println("Unknown pack format given in config");
+                LOGGER.error("Unknown pack format given in config");
                 return;
             }
 
-            // packtype.installPack();
+            packtype.installPack();
             lockFile.packInstalled = true;
             lockFile.packUrl = config.install.modpackUrl;
             saveLockFile(lockFile);
+
 
             String forgeVersion = packtype.getForgeVersion();
             String mcVersion = packtype.getMCVersion();
@@ -64,9 +69,18 @@ public class ServerStarter {
             lockFile.forgeVersion = forgeVersion;
             lockFile.mcVersion = mcVersion;
             saveLockFile(lockFile);
+        } else {
+            LOGGER.info("Server is already installed to correct version, to force install delete the serverstarter.lock File.");
         }
+
+        startServer(config);
     }
 
+    /**
+     * Reads the config and parses the config
+     *
+     * @return the configfile object
+     */
     public static ConfigFile readConfig() {
         Yaml yaml = new Yaml(new Constructor(ConfigFile.class), rep, options);
         try {
@@ -77,6 +91,9 @@ public class ServerStarter {
         }
     }
 
+    /**
+     * Reads the lockfile if present, returns a new if not
+     */
     public static LockFile readLockFile() {
         Yaml yaml = new Yaml(new Constructor(LockFile.class), rep, options);
         File file = new File("serverstarter.lock");
@@ -92,6 +109,11 @@ public class ServerStarter {
         }
     }
 
+    /**
+     * Writes the lockfile to disk
+     *
+     * @param lockFile lockfile to write
+     */
     public static void saveLockFile(LockFile lockFile) {
         Yaml yaml = new Yaml(new Constructor(LockFile.class), rep, options);
         File file = new File("serverstarter.lock");
@@ -115,7 +137,8 @@ public class ServerStarter {
         try {
             FileUtils.copyURLToFile(new URL(url), installerPath);
 
-            System.out.println("Starting installation of Forge, installer output incoming");
+            LOGGER.info("Starting installation of Forge, installer output incoming");
+            LOGGER.info("Check log for installer for more information", true);
             Process installer = new ProcessBuilder("java", "-jar", installerPath.getAbsolutePath(), "--installServer")
                     .inheritIO()
                     .directory(new File(basePath))
@@ -123,12 +146,13 @@ public class ServerStarter {
 
             installer.waitFor();
 
-            System.out.println("Done installing forge, deleting installer!");
+            LOGGER.info("Done installing forge, deleting installer!");
+
+            //noinspection ResultOfMethodCallIgnored
             installerPath.delete();
         } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
+            LOGGER.error("Problem while installing Forge", e);
         }
-
     }
 
     private static void startServer(ConfigFile configFile) {
@@ -140,9 +164,11 @@ public class ServerStarter {
             List<String> arguments = new ArrayList<>();
             Collections.addAll(arguments, "java", "-jar", forgeUniversal.getAbsolutePath());
             arguments.addAll(configFile.launch.javaArgs);
+            arguments.add("nogui");
 
-            System.out.println("Starting installation of Forge, installer output incoming");
-            Process installer = new ProcessBuilder()
+            LOGGER.info("Starting Forge, output incoming");
+            LOGGER.info("For output of this check the server log", true);
+            Process installer = new ProcessBuilder(arguments)
                     .inheritIO()
                     .directory(new File(configFile.install.baseInstallPath))
                     .start();
@@ -154,10 +180,5 @@ public class ServerStarter {
         }
     }
 
-    private static boolean checkShouldInstall(ConfigFile configFile) {
-        return !lockFile.forgeInstalled
-                || !lockFile.packInstalled
-                || !Objects.equals(lockFile.forgeVersion, configFile.install.forgeVersion)
-                || !Objects.equals(lockFile.packUrl, configFile.install.modpackUrl);
-    }
+
 }

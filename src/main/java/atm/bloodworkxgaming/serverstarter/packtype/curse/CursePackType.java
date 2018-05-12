@@ -10,6 +10,7 @@ import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
+import com.sun.media.jfxmedia.logging.Logger;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
@@ -28,6 +29,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+
+import static atm.bloodworkxgaming.serverstarter.ServerStarter.LOGGER;
 
 public class CursePackType implements IPackType {
     private ConfigFile configFile;
@@ -50,8 +53,8 @@ public class CursePackType implements IPackType {
                 url += "/download";
 
             try {
-                // unzipFile(downloadPack(url));
-                unzipFile(new File(basePath + "modpack-download.zip"));
+                unzipFile(downloadPack(url));
+                // unzipFile(new File(basePath + "modpack-download.zip"));
                 handleManifest();
 
             } catch (IOException e) {
@@ -62,7 +65,7 @@ public class CursePackType implements IPackType {
         } else if (configFile.install.formatSpecific.containsKey("packid") && configFile.install.formatSpecific.containsKey("fileid")) {
             try {
                 HttpResponse<JsonNode> res = Unirest.get("/api/v2/direct/GetAddOnFile/" + configFile.install.formatSpecific.get("packid") + "/" + configFile.install.formatSpecific.get("fileid")).asJson();
-                System.out.println("res = " + res);
+                LOGGER.info("PackID request response: " + res);
             } catch (UnirestException e) {
                 e.printStackTrace();
             }
@@ -97,17 +100,18 @@ public class CursePackType implements IPackType {
      * @throws IOException if something went wrong while downloading
      */
     private File downloadPack(String url) throws IOException {
+        LOGGER.info("Attempting to download modpack Zip.");
+
         try {
             File to = new File(basePath + "modpack-download.zip");
-            System.out.println("to = " + to.getAbsolutePath());
 
             FileUtils.copyURLToFile(new URL(url), to);
-            System.out.println("Downloaded file!");
+            LOGGER.info("Downloaded the modpack zip file to " + to.getAbsolutePath());
 
             return to;
 
         } catch (IOException e) {
-            System.err.println("Pack could not be downloaded");
+            LOGGER.error("Pack could not be downloaded");
             throw e;
         }
     }
@@ -115,7 +119,7 @@ public class CursePackType implements IPackType {
     private void unzipFile(File downloadedPack) throws IOException {
         // start with deleting the mods folder as it is not garanteed to have override mods
         FileUtils.deleteDirectory(new File(basePath + "mods/"));
-        System.out.println("Deleted the mods folder");
+        LOGGER.info("Deleted the mods folder");
 
         // unzip start
         try (ZipInputStream zis = new ZipInputStream(new FileInputStream(downloadedPack));) {
@@ -124,7 +128,7 @@ public class CursePackType implements IPackType {
             byte[] buffer = new byte[1024];
 
             while (entry != null) {
-                System.out.println("entry = " + entry);
+                LOGGER.info("Entry in zip: " + entry, true);
                 String name = entry.getName();
 
                 // special manifest treatment
@@ -145,7 +149,7 @@ public class CursePackType implements IPackType {
                 if (name.startsWith("overrides/")) {
                     if (!name.endsWith("/")) {
                         File outfile = new File(basePath + entry.getName().substring(10));
-                        System.out.println("outfile = " + outfile);
+                        LOGGER.info("Copying zip entry to = " + outfile, true);
                         //noinspection ResultOfMethodCallIgnored
                         new File(outfile.getParent()).mkdirs();
 
@@ -160,7 +164,7 @@ public class CursePackType implements IPackType {
                         File newFolder = new File(basePath + entry.getName().substring(10));
                         FileUtils.deleteDirectory(newFolder);
 
-                        System.out.println("FOLDER Deleted: " + newFolder.getAbsolutePath());
+                        LOGGER.info("FOLDER Deleted: " + newFolder.getAbsolutePath());
                     }
                 }
 
@@ -171,8 +175,7 @@ public class CursePackType implements IPackType {
 
             zis.closeEntry();
         } catch (IOException e) {
-            System.err.println("Could not unzip files");
-            throw e;
+            LOGGER.error("Could not unzip files", e);
         }
     }
 
@@ -181,7 +184,7 @@ public class CursePackType implements IPackType {
 
         try (FileReader reader = new FileReader(new File(basePath + "manifest.json"))) {
             JsonObject json = new JsonParser().parse(reader).getAsJsonObject();
-            System.out.println("json = " + json);
+            LOGGER.info("manifest JSON Object: " + json, true);
             JsonObject mcObj = json.getAsJsonObject("minecraft");
 
             if (mcVersion == null) {
@@ -232,7 +235,7 @@ public class CursePackType implements IPackType {
         JsonArray array = new JsonArray();
         for (ModEntryRaw mod : mods) {
             if (!ignoreSet.isEmpty() && ignoreSet.contains(mod.projectID)) {
-                System.out.println("Skipping mod with projectID: " + mod.projectID);
+                LOGGER.info("Skipping mod with projectID: " + mod.projectID);
                 continue;
             }
 
@@ -242,7 +245,7 @@ public class CursePackType implements IPackType {
             array.add(objMod);
         }
         request.add("addOnFileKeys", array);
-        System.out.println("request = " + request.toString());
+        LOGGER.info("About to make a request to cursemeta with body: " + request.toString());
 
         try {
             HttpResponse<JsonNode> res = Unirest
@@ -267,11 +270,9 @@ public class CursePackType implements IPackType {
                         .getAsJsonPrimitive("DownloadURL").getAsString());
             }
 
+            LOGGER.info("Response from manifest query: " + jsonRes, true);
+            LOGGER.info("Mods to download: " + modsToDownload, true);
             processMods(modsToDownload);
-
-            System.out.println("res: " + jsonRes);
-            System.out.println("modsToDownload = " + modsToDownload);
-
 
         } catch (UnirestException e) {
             e.printStackTrace();
@@ -304,13 +305,11 @@ public class CursePackType implements IPackType {
         fallbackList.forEach(s -> processSingleMod(s, count, totalCount, secondFail, ignorePatterns));
 
         if (!secondFail.isEmpty()) {
-            System.out.println("Failed to download (a) mod(s):");
+            LOGGER.warn("Failed to download (a) mod(s):");
             for (String s : secondFail) {
-                System.out.println("\t" + s);
+                LOGGER.warn("\t" + s);
             }
-
         }
-
     }
 
     /**
@@ -327,17 +326,16 @@ public class CursePackType implements IPackType {
             String modName = FilenameUtils.getName(mod);
             for (Pattern ignorePattern : ignorePatterns) {
                 if (ignorePattern.matcher(modName).matches()) {
-                    System.out.println("[" + counter.incrementAndGet() + "/" + totalCount + "] Skipped ignored mod: " + modName);
+                    LOGGER.info("[" + counter.incrementAndGet() + "/" + totalCount + "] Skipped ignored mod: " + modName);
                 }
             }
 
             URI uri = new URI("https", "files.forgecdn.net", mod.substring(26), null);
 
             FileUtils.copyURLToFile(
-                    //new URL(uri.toASCIIString()),
                     uri.toURL(),
                     new File(basePath + "mods/" + modName));
-            System.out.println("[" + counter.incrementAndGet() + "/" + totalCount + "] Downloaded mod: " + modName);
+            LOGGER.info("[" + counter.incrementAndGet() + "/" + totalCount + "] Downloaded mod: " + modName);
         } catch (IOException e) {
             fallbackList.add(mod);
             e.printStackTrace();

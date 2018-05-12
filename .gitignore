@@ -16,3 +16,4 @@ gradle-app.setting
 /out/
 /setup/
 /test/
+/serverstarter.log
