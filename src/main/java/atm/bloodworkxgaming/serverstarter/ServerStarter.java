@@ -18,11 +18,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 
 public class ServerStarter {
@@ -188,7 +187,21 @@ public class ServerStarter {
     private static void checkEULA(String basepath) {
         try {
             File eulaFile = new File(basepath + "eula.txt");
-            List<String> lines = FileUtils.readLines(eulaFile, "utf-8");
+
+
+            List<String> lines;
+            if (eulaFile.exists()) {
+                lines = FileUtils.readLines(eulaFile, "utf-8");
+            } else {
+                lines = new ArrayList<>();
+                Collections.addAll(lines,
+                        "#By changing the setting below to TRUE you are indicating your agreement to our EULA (https://account.mojang.com/documents/minecraft_eula).",
+                        "#" + ZonedDateTime.now().format(DateTimeFormatter.ofPattern("E MMM d HH:mm:ss O y", Locale.ENGLISH)),
+                        "eula=false");
+            }
+
+
+
             if (lines.size() > 2 && !lines.get(2).contains("true")) {
                 try (Scanner scanner = new Scanner(System.in)) {
 
