@@ -48,17 +48,16 @@ install:
   # often a server needs more files, which are nearly useless on the client, such as tickprofiler
   # This is a list of files, each ' - ' is a new file:
   # url is the directlink to the file, destination is the path to where the file should be copied to
-  # use {filename} as a selector for the filename, or give it a filename if you want to overwrite the name
   additionalFiles:
     - url: https://minecraft.curseforge.com/projects/tickprofiler/files/2536494/download
-      destination: ./mods/{filename}
+      destination: ./mods/TickProfiler-1.12-0.0.4.jar
     - url: https://minecraft.curseforge.com/projects/blooddebug/files/2514858/download
-      destination: ./mods/{filename}
+      destination: ./mods/BloodDebug-1.12.2-0.0.1-9.jar
 
   # For often there are config which the user wants to change, here is the place to put the local path to configs, jars or whatever
   localFiles:
     - from: ../custommods/discord-chat.jar
-      to: ./mods/{filename}
+      to: ./mods/discord-chat.jar
 
   # This makes the program check the folder for whether it is supposed to use the
   checkFolder: yes

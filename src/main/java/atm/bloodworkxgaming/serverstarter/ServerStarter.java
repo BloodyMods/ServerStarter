@@ -43,6 +43,8 @@ public class ServerStarter {
         ConfigFile config = readConfig();
         lockFile = readLockFile();
 
+        boolean installOnly = args.length > 0 && args[0].equals("install");
+
         if (config == null || lockFile == null) {
             LOGGER.error("One file is null: config: " + config + " lock: " + lockFile);
             return;
@@ -52,7 +54,7 @@ public class ServerStarter {
         if (config.install.baseInstallPath == null) config.install.baseInstallPath = "";
 
 
-        if (lockFile.checkShouldInstall(config)) {
+        if (lockFile.checkShouldInstall(config) || installOnly) {
             IPackType packtype = TypeFactory.createPackType(config.install.modpackFormat, config);
             if (packtype == null) {
                 LOGGER.error("Unknown pack format given in config");
@@ -69,9 +71,17 @@ public class ServerStarter {
             String mcVersion = packtype.getMCVersion();
             installForge(config.install.baseInstallPath, forgeVersion, mcVersion);
 
+            FileManager filemanger = new FileManager(config);
+            filemanger.installAdditionalFiles();
+
 
         } else {
             LOGGER.info("Server is already installed to correct version, to force install delete the serverstarter.lock File.");
+        }
+
+        if (installOnly) {
+            LOGGER.info("Install only mod, exiting now.");
+            return;
         }
 
         checkEULA(config.install.baseInstallPath);
@@ -200,7 +210,6 @@ public class ServerStarter {
         }
     }
 
-
     private static void installForge(String basePath, String forgeVersion, String mcVersion) {
         String temp = mcVersion + "-" + forgeVersion;
         String url = "http://files.minecraftforge.net/maven/net/minecraftforge/forge/" + temp + "/forge-" + temp + "-installer.jar";
@@ -238,12 +247,14 @@ public class ServerStarter {
     private static void startServer(ConfigFile configFile) {
 
         try {
-            File forgeUniversal = new File(configFile.install.baseInstallPath
-                    + "forge-" + lockFile.mcVersion + "-" + lockFile.forgeVersion + "-universal.jar");
+            String filename = "forge-" + lockFile.mcVersion + "-" + lockFile.forgeVersion + "-universal.jar";
+            File forgeUniversal = new File(configFile.install.baseInstallPath + filename);
 
             List<String> arguments = new ArrayList<>();
-            Collections.addAll(arguments, "java", "-jar", forgeUniversal.getAbsolutePath());
+
+            arguments.add("java");
             arguments.addAll(configFile.launch.javaArgs);
+            Collections.addAll(arguments, "-jar", forgeUniversal.getAbsolutePath());
             arguments.add("nogui");
 
             LOGGER.info("Starting Forge, output incoming");
@@ -261,7 +272,7 @@ public class ServerStarter {
             process.getInputStream().close();
 
         } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
+            LOGGER.error("Error while starting the server", e);
         }
     }
 }

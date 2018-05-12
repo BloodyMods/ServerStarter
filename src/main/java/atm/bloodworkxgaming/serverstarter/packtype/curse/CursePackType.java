@@ -1,5 +1,6 @@
 package atm.bloodworkxgaming.serverstarter.packtype.curse;
 
+import atm.bloodworkxgaming.serverstarter.FileManager;
 import atm.bloodworkxgaming.serverstarter.config.ConfigFile;
 import atm.bloodworkxgaming.serverstarter.packtype.IPackType;
 import com.google.gson.JsonArray;
@@ -334,17 +335,15 @@ public class CursePackType implements IPackType {
                 }
             }
 
-            URI uri = new URI("https", "files.forgecdn.net", mod.substring(26), null);
-
             FileUtils.copyURLToFile(
-                    uri.toURL(),
+                    FileManager.cleanUrl(mod),
                     new File(basePath + "mods/" + modName));
             LOGGER.info("[" + String.format("% 3d", counter.incrementAndGet()) + "/" + totalCount + "] Downloaded mod: " + modName);
         } catch (IOException e) {
+            LOGGER.error("Failed to download mod", e);
             fallbackList.add(mod);
-            e.printStackTrace();
         } catch (URISyntaxException e) {
-            e.printStackTrace();
+            LOGGER.error("Invalid url for " + mod, e);
         }
     }
 
