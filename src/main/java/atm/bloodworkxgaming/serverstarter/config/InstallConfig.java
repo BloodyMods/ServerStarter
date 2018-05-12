@@ -14,7 +14,7 @@ public class InstallConfig {
     public String forgeInstallerUrl;
     public String modpackUrl;
     public String modpackFormat;
-    public HashMap<String, String> formatSpecific;
+    public HashMap<String, Object> formatSpecific;
 
     public String baseInstallPath;
     public List<String> ignoreFiles;
@@ -23,7 +23,8 @@ public class InstallConfig {
 
     public boolean checkFolder;
 
-    public String getFormatSpecificSettingOrDefault(String name, String fallback) {
-        return formatSpecific == null ? fallback : formatSpecific.getOrDefault(name, fallback);
+    @SuppressWarnings("unchecked")
+    public <T> T getFormatSpecificSettingOrDefault(String name, T fallback) {
+        return formatSpecific == null ? fallback : (T) formatSpecific.getOrDefault(name, fallback);
     }
 }

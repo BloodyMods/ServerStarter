@@ -15,6 +15,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URL;
+import java.util.*;
 
 
 public class ServerStarter {
@@ -45,10 +47,23 @@ public class ServerStarter {
 
         if (checkShouldInstall(config)) {
             IPackType packtype = TypeFactory.createPackType(config.install.modpackFormat, config);
-            if (packtype != null)
-                packtype.installPack();
-            else
+            if (packtype == null) {
                 System.out.println("Unknown pack format given in config");
+                return;
+            }
+
+            // packtype.installPack();
+            lockFile.packInstalled = true;
+            lockFile.packUrl = config.install.modpackUrl;
+            saveLockFile(lockFile);
+
+            String forgeVersion = packtype.getForgeVersion();
+            String mcVersion = packtype.getMCVersion();
+            installForge(config.install.baseInstallPath, forgeVersion, mcVersion);
+            lockFile.forgeInstalled = true;
+            lockFile.forgeVersion = forgeVersion;
+            lockFile.mcVersion = mcVersion;
+            saveLockFile(lockFile);
         }
     }
 
@@ -68,7 +83,7 @@ public class ServerStarter {
 
         if (file.exists()) {
             try {
-                return  yaml.load(new FileInputStream(file));
+                return yaml.load(new FileInputStream(file));
             } catch (FileNotFoundException e) {
                 return new LockFile();
             }
@@ -90,10 +105,59 @@ public class ServerStarter {
         }
     }
 
+    private static void installForge(String basePath, String forgeVersion, String mcVersion) {
+        String temp = mcVersion + "-" + forgeVersion;
+        String url = "http://files.minecraftforge.net/maven/net/minecraftforge/forge/" + temp + "/forge-" + temp + "-installer.jar";
+        // http://files.minecraftforge.net/maven/net/minecraftforge/forge/1.12.2-14.23.3.2682/forge-1.12.2-14.23.3.2682-installer.jar
+        File installerPath = new File(basePath + "forge-" + temp + "-installer.jar");
+
+
+        try {
+            FileUtils.copyURLToFile(new URL(url), installerPath);
+
+            System.out.println("Starting installation of Forge, installer output incoming");
+            Process installer = new ProcessBuilder("java", "-jar", installerPath.getAbsolutePath(), "--installServer")
+                    .inheritIO()
+                    .directory(new File(basePath))
+                    .start();
+
+            installer.waitFor();
+
+            System.out.println("Done installing forge, deleting installer!");
+            installerPath.delete();
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private static void startServer(ConfigFile configFile) {
+
+        try {
+            File forgeUniversal = new File(configFile.install.baseInstallPath
+                    + "forge-" + lockFile.mcVersion + "-" + lockFile.forgeVersion + "-universal.jar");
+
+            List<String> arguments = new ArrayList<>();
+            Collections.addAll(arguments, "java", "-jar", forgeUniversal.getAbsolutePath());
+            arguments.addAll(configFile.launch.javaArgs);
+
+            System.out.println("Starting installation of Forge, installer output incoming");
+            Process installer = new ProcessBuilder()
+                    .inheritIO()
+                    .directory(new File(configFile.install.baseInstallPath))
+                    .start();
+
+            installer.waitFor();
+
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
     private static boolean checkShouldInstall(ConfigFile configFile) {
         return !lockFile.forgeInstalled
                 || !lockFile.packInstalled
-                || !lockFile.forgeVersion.equals(configFile.install.forgeVersion)
-                || !lockFile.packUrl.equals(configFile.install.modpackUrl);
+                || !Objects.equals(lockFile.forgeVersion, configFile.install.forgeVersion)
+                || !Objects.equals(lockFile.packUrl, configFile.install.modpackUrl);
     }
 }

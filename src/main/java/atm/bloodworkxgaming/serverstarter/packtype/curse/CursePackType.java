@@ -15,27 +15,31 @@ import lombok.Getter;
 import lombok.ToString;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.utils.URIBuilder;
 
 import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 public class CursePackType implements IPackType {
     private ConfigFile configFile;
     private String basePath;
+    private String forgeVersion;
+    private String mcVersion;
 
     public CursePackType(ConfigFile configFile) {
         this.configFile = configFile;
         basePath = configFile.install.baseInstallPath;
+        forgeVersion = configFile.install.forgeVersion;
+        mcVersion = configFile.install.mcVersion;
     }
 
     @Override
@@ -65,7 +69,33 @@ public class CursePackType implements IPackType {
         }
     }
 
+    /**
+     * Gets the forge version, can be based on the version from the downloaded pack
+     *
+     * @return String representation of the version
+     */
+    @Override
+    public String getForgeVersion() {
+        return forgeVersion;
+    }
 
+    /**
+     * Gets the forge version, can be based on the version from the downloaded pack
+     *
+     * @return String representation of the version
+     */
+    @Override
+    public String getMCVersion() {
+        return mcVersion;
+    }
+
+    /**
+     * Downloads the modpack from the given url
+     *
+     * @param url URL to download from
+     * @return File of the saved modpack zip
+     * @throws IOException if something went wrong while downloading
+     */
     private File downloadPack(String url) throws IOException {
         try {
             File to = new File(basePath + "modpack-download.zip");
@@ -147,21 +177,26 @@ public class CursePackType implements IPackType {
     }
 
     private void handleManifest() throws IOException {
-        String forgeVersion = null;
-        String mcVersion = null;
         List<ModEntryRaw> mods = new ArrayList<>();
 
         try (FileReader reader = new FileReader(new File(basePath + "manifest.json"))) {
             JsonObject json = new JsonParser().parse(reader).getAsJsonObject();
             System.out.println("json = " + json);
             JsonObject mcObj = json.getAsJsonObject("minecraft");
-            mcVersion = mcObj.getAsJsonPrimitive("version").getAsString();
-            JsonArray loaders = mcObj.getAsJsonArray("modLoaders");
 
-            if (loaders.size() > 0) {
-                forgeVersion = loaders.get(0).getAsJsonObject().getAsJsonPrimitive("id").getAsString();
+            if (mcVersion == null) {
+                mcVersion = mcObj.getAsJsonPrimitive("version").getAsString();
             }
 
+            // gets the forge version
+            if (forgeVersion == null) {
+                JsonArray loaders = mcObj.getAsJsonArray("modLoaders");
+                if (loaders.size() > 0) {
+                    forgeVersion = loaders.get(0).getAsJsonObject().getAsJsonPrimitive("id").getAsString();
+                }
+            }
+
+            // gets all the mods
             for (JsonElement jsonElement : json.getAsJsonArray("files")) {
                 JsonObject obj = jsonElement.getAsJsonObject();
                 mods.add(new ModEntryRaw(
@@ -170,17 +205,37 @@ public class CursePackType implements IPackType {
             }
         }
 
-        forgeVersion = configFile.install.forgeVersion == null ? forgeVersion : configFile.install.forgeVersion;
-        mcVersion = configFile.install.mcVersion == null ? mcVersion : configFile.install.mcVersion;
-
         downloadMods(mods);
     }
 
+    /**
+     * Downloads the mods specified in the manifest
+     * Gets the data from cursemeta
+     *
+     * @param mods List of the mods from the manifest
+     */
     private void downloadMods(List<ModEntryRaw> mods) {
-        JsonObject request = new JsonObject();
+        Set<String> ignoreSet = new HashSet<>();
+        List<Object> ignoreListTemp = configFile.install.getFormatSpecificSettingOrDefault("ignoreProject", null);
+
+        if (ignoreListTemp != null)
+            for (Object o : ignoreListTemp) {
+                if (o instanceof String)
+                    ignoreSet.add((String) o);
+
+                if (o instanceof Integer)
+                    ignoreSet.add(String.valueOf(o));
+            }
+
         // constructs the body
+        JsonObject request = new JsonObject();
         JsonArray array = new JsonArray();
         for (ModEntryRaw mod : mods) {
+            if (!ignoreSet.isEmpty() && ignoreSet.contains(mod.projectID)) {
+                System.out.println("Skipping mod with projectID: " + mod.projectID);
+                continue;
+            }
+
             JsonObject objMod = new JsonObject();
             objMod.addProperty("AddOnID", mod.projectID);
             objMod.addProperty("FileID", mod.fileID);
@@ -223,16 +278,30 @@ public class CursePackType implements IPackType {
         }
     }
 
+    /**
+     * Downloads all mods, with a second fallback if failed
+     * This is done in parrallel for better performance
+     *
+     * @param mods List of urls
+     */
     private void processMods(List<String> mods) {
+        // constructs the ignore list
+        List<Pattern> ignorePatterns = new ArrayList<>();
+        for (String ignoreFile : configFile.install.ignoreFiles) {
+            if (ignoreFile.startsWith("mods/")) {
+                ignorePatterns.add(Pattern.compile(ignoreFile.substring(ignoreFile.lastIndexOf('/'))));
+            }
+        }
+
+        // downloads the mods
         AtomicInteger count = new AtomicInteger(0);
         int totalCount = mods.size();
         List<String> fallbackList = new ArrayList<>();
 
-        mods.stream().parallel().forEach(s -> processSingleMod(s, count, totalCount, fallbackList));
-        // mods.forEach(s -> processSingleMod(s, count, totalCount, fallbackList));
+        mods.stream().parallel().forEach(s -> processSingleMod(s, count, totalCount, fallbackList, ignorePatterns));
 
         List<String> secondFail = new ArrayList<>();
-        fallbackList.forEach(s -> processSingleMod(s, count, totalCount, secondFail));
+        fallbackList.forEach(s -> processSingleMod(s, count, totalCount, secondFail, ignorePatterns));
 
         if (!secondFail.isEmpty()) {
             System.out.println("Failed to download (a) mod(s):");
@@ -244,9 +313,24 @@ public class CursePackType implements IPackType {
 
     }
 
-    private void processSingleMod(String mod, AtomicInteger counter, int totalCount, List<String> fallbackList) {
+    /**
+     * Downloads a single mod and saves to the /mods directory
+     *
+     * @param mod            URL of the mod
+     * @param counter        current counter of how many mods have already been downloaded
+     * @param totalCount     total count of mods that have to be downloaded
+     * @param fallbackList   List to write to when it failed
+     * @param ignorePatterns Patterns of mods which should be ignored
+     */
+    private void processSingleMod(String mod, AtomicInteger counter, int totalCount, List<String> fallbackList, List<Pattern> ignorePatterns) {
         try {
             String modName = FilenameUtils.getName(mod);
+            for (Pattern ignorePattern : ignorePatterns) {
+                if (ignorePattern.matcher(modName).matches()) {
+                    System.out.println("[" + counter.incrementAndGet() + "/" + totalCount + "] Skipped ignored mod: " + modName);
+                }
+            }
+
             URI uri = new URI("https", "files.forgecdn.net", mod.substring(26), null);
 
             FileUtils.copyURLToFile(
@@ -262,6 +346,10 @@ public class CursePackType implements IPackType {
         }
     }
 
+
+    /**
+     * Data class to keep projectID and fileID together
+     */
     @AllArgsConstructor
     @ToString
     private static class ModEntryRaw {
