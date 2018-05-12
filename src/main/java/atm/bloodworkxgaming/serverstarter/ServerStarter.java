@@ -10,7 +10,6 @@ import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.nodes.Tag;
-import org.yaml.snakeyaml.reader.StreamReader;
 import org.yaml.snakeyaml.representer.Representer;
 
 import java.io.*;
@@ -201,35 +200,11 @@ public class ServerStarter {
             LOGGER.info("For output of this check the server log", true);
             Process process = new ProcessBuilder(arguments)
                     .inheritIO()
-                    .redirectInput(ProcessBuilder.Redirect.PIPE)
                     .directory(new File(configFile.install.baseInstallPath + "."))
                     .start();
 
-
-            process.getOutputStream();
-
-            Thread inThread = new Thread(() -> {
-                Scanner scanner = new Scanner(System.in);
-                System.out.println("scanner.delimiter() = " + scanner.delimiter());
-                Reader reader = new InputStreamReader(System.in);
-                reader.read()
-
-                while (scanner.hasNext() && process.isAlive())
-                    try {
-                        String b = scanner.next() + "\n";
-                        LOGGER.info("byte: " + b);
-                        process.getOutputStream().write(b.getBytes());
-                        process.getOutputStream().flush();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-            });
-
-            inThread.start();
-
-
+            
             process.waitFor();
-
 
             process.getOutputStream().close();
             process.getErrorStream().close();
