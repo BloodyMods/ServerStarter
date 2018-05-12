@@ -26,10 +26,10 @@ import java.util.Scanner;
 
 
 public class ServerStarter {
+    public static final PrimitiveLogger LOGGER = new PrimitiveLogger(new File("serverstarter.log"));
+    public static LockFile lockFile = null;
     private static Representer rep;
     private static DumperOptions options;
-    public static LockFile lockFile = null;
-    public static final PrimitiveLogger LOGGER = new PrimitiveLogger(new File("serverstarter.log"));
 
     static {
         rep = new Representer();
@@ -42,8 +42,6 @@ public class ServerStarter {
     public static void main(String[] args) {
         ConfigFile config = readConfig();
         lockFile = readLockFile();
-
-        // DiagSignalHandler.install("TERM");
 
         if (config == null || lockFile == null) {
             LOGGER.error("One file is null: config: " + config + " lock: " + lockFile);
@@ -79,6 +77,59 @@ public class ServerStarter {
         checkEULA(config.install.baseInstallPath);
         handleServer(config);
     }
+
+
+    /**
+     * Reads the config and parses the config
+     *
+     * @return the configfile object
+     */
+    public static ConfigFile readConfig() {
+        Yaml yaml = new Yaml(new Constructor(ConfigFile.class), rep, options);
+        try {
+            return yaml.load(new FileInputStream(new File("server-setup-config.yaml")));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * Reads the lockfile if present, returns a new if not
+     */
+    public static LockFile readLockFile() {
+        Yaml yaml = new Yaml(new Constructor(LockFile.class), rep, options);
+        File file = new File("serverstarter.lock");
+
+        if (file.exists()) {
+            try {
+                return yaml.load(new FileInputStream(file));
+            } catch (FileNotFoundException e) {
+                return new LockFile();
+            }
+        } else {
+            return new LockFile();
+        }
+    }
+
+    /**
+     * Writes the lockfile to disk
+     *
+     * @param lockFile lockfile to write
+     */
+    public static void saveLockFile(LockFile lockFile) {
+        Yaml yaml = new Yaml(new Constructor(LockFile.class), rep, options);
+        File file = new File("serverstarter.lock");
+        ServerStarter.lockFile = lockFile;
+
+        String lock = "#Auto genereated file, DO NOT EDIT!\n" + yaml.dump(lockFile);
+        try {
+            FileUtils.write(file, lock, "utf-8", false);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     private static void handleServer(ConfigFile config) {
         List<LocalDateTime> starttimes = new ArrayList<>();
@@ -149,56 +200,6 @@ public class ServerStarter {
         }
     }
 
-    /**
-     * Reads the config and parses the config
-     *
-     * @return the configfile object
-     */
-    public static ConfigFile readConfig() {
-        Yaml yaml = new Yaml(new Constructor(ConfigFile.class), rep, options);
-        try {
-            return yaml.load(new FileInputStream(new File("server-setup-config.yaml")));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    /**
-     * Reads the lockfile if present, returns a new if not
-     */
-    public static LockFile readLockFile() {
-        Yaml yaml = new Yaml(new Constructor(LockFile.class), rep, options);
-        File file = new File("serverstarter.lock");
-
-        if (file.exists()) {
-            try {
-                return yaml.load(new FileInputStream(file));
-            } catch (FileNotFoundException e) {
-                return new LockFile();
-            }
-        } else {
-            return new LockFile();
-        }
-    }
-
-    /**
-     * Writes the lockfile to disk
-     *
-     * @param lockFile lockfile to write
-     */
-    public static void saveLockFile(LockFile lockFile) {
-        Yaml yaml = new Yaml(new Constructor(LockFile.class), rep, options);
-        File file = new File("serverstarter.lock");
-        ServerStarter.lockFile = lockFile;
-
-        String lock = "#Auto genereated file, DO NOT EDIT!\n" + yaml.dump(lockFile);
-        try {
-            FileUtils.write(file, lock, "utf-8", false);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
     private static void installForge(String basePath, String forgeVersion, String mcVersion) {
         String temp = mcVersion + "-" + forgeVersion;

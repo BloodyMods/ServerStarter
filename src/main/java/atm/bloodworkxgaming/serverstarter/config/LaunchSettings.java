@@ -4,6 +4,7 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 import java.util.List;
+
 @EqualsAndHashCode
 @ToString
 public class LaunchSettings {

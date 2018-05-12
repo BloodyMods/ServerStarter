@@ -8,12 +8,14 @@ public interface IPackType {
 
     /**
      * Gets the forge version, can be based on the version from the downloaded pack
+     *
      * @return String representation of the version
      */
     String getForgeVersion();
 
     /**
      * Gets the forge version, can be based on the version from the downloaded pack
+     *
      * @return String representation of the version
      */
     String getMCVersion();

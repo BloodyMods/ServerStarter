@@ -5,6 +5,7 @@ import lombok.ToString;
 
 import java.util.HashMap;
 import java.util.List;
+
 @EqualsAndHashCode
 @ToString
 public class InstallConfig {
