@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id "com.github.johnrengelman.shadow" version "2.0.4"
 }
 
 group 'atm.bloodworkxgaming'
@@ -22,3 +23,20 @@ dependencies {
 
     compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.16.20'
 }
+
+shadowJar {
+    classifier = ""
+}
+
+jar {
+    manifest {
+        attributes(
+                'Class-Path': configurations.compile.collect { it.getName() }.join(' '),
+                'Main-Class': 'atm.bloodworkxgaming.serverstarter.ServerStarter'
+        )
+    }
+}
+
+
+tasks.build.dependsOn shadowJar
+

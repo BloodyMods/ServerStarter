@@ -11,6 +11,8 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.representer.Representer;
+import sun.misc.Signal;
+import sun.misc.SignalHandler;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -20,6 +22,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Scanner;
 
 
 public class ServerStarter {
@@ -39,6 +42,8 @@ public class ServerStarter {
     public static void main(String[] args) {
         ConfigFile config = readConfig();
         lockFile = readLockFile();
+
+        // DiagSignalHandler.install("TERM");
 
         if (config == null || lockFile == null) {
             LOGGER.error("One file is null: config: " + config + " lock: " + lockFile);
@@ -65,15 +70,39 @@ public class ServerStarter {
             String forgeVersion = packtype.getForgeVersion();
             String mcVersion = packtype.getMCVersion();
             installForge(config.install.baseInstallPath, forgeVersion, mcVersion);
-            lockFile.forgeInstalled = true;
-            lockFile.forgeVersion = forgeVersion;
-            lockFile.mcVersion = mcVersion;
-            saveLockFile(lockFile);
+
+
         } else {
             LOGGER.info("Server is already installed to correct version, to force install delete the serverstarter.lock File.");
         }
 
+        checkEULA(config.install.baseInstallPath);
         startServer(config);
+    }
+
+    private static void checkEULA(String basepath) {
+        try {
+            File eulaFile = new File(basepath + "eula.txt");
+            List<String> lines = FileUtils.readLines(eulaFile, "utf-8");
+            if (lines.size() > 2 && !lines.get(2).contains("true")) {
+                try (Scanner scanner = new Scanner(System.in)) {
+
+                    LOGGER.info("You have not accepted the eula yet.");
+                    LOGGER.info("By typing TRUE you are indicating your agreement to the EULA of Mojang.");
+                    LOGGER.info("Read it at https://account.mojang.com/documents/minecraft_eula before accepting it.");
+
+                    String answer = scanner.nextLine();
+                    if (answer.trim().equalsIgnoreCase("true")) {
+                        LOGGER.info("You have accepted the EULA.");
+                        lines.set(2, "eula=true\n");
+                        FileUtils.writeLines(eulaFile, lines);
+                    }
+                }
+            }
+
+        } catch (IOException e) {
+            LOGGER.error("Error while checking EULA", e);
+        }
     }
 
     /**
@@ -135,18 +164,24 @@ public class ServerStarter {
 
 
         try {
+            LOGGER.info("Attempting to download forge installer from " + url);
             FileUtils.copyURLToFile(new URL(url), installerPath);
 
             LOGGER.info("Starting installation of Forge, installer output incoming");
             LOGGER.info("Check log for installer for more information", true);
             Process installer = new ProcessBuilder("java", "-jar", installerPath.getAbsolutePath(), "--installServer")
                     .inheritIO()
-                    .directory(new File(basePath))
+                    .directory(new File(basePath + "."))
                     .start();
 
             installer.waitFor();
 
             LOGGER.info("Done installing forge, deleting installer!");
+
+            lockFile.forgeInstalled = true;
+            lockFile.forgeVersion = forgeVersion;
+            lockFile.mcVersion = mcVersion;
+            saveLockFile(lockFile);
 
             //noinspection ResultOfMethodCallIgnored
             installerPath.delete();
@@ -170,13 +205,82 @@ public class ServerStarter {
             LOGGER.info("For output of this check the server log", true);
             Process installer = new ProcessBuilder(arguments)
                     .inheritIO()
-                    .directory(new File(configFile.install.baseInstallPath))
+                    .redirectOutput(ProcessBuilder.Redirect.PIPE)
+                    .directory(new File(configFile.install.baseInstallPath + "."))
                     .start();
+
+
+
+            installer.getOutputStream();
+
+            Thread inThread = new Thread(() -> {
+                Scanner scanner = new Scanner(System.in);
+
+                try {
+                    installer.getOutputStream().write(scanner.nextByte());
+                    installer.getOutputStream().flush();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+
+            inThread.start();
+
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                LOGGER.info("Shutdown cook called");
+            }));
 
             installer.waitFor();
 
+
+
+
+
+
+
+            installer.getOutputStream().close();
+            installer.getErrorStream().close();
+            installer.getInputStream().close();
+
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
+        }
+    }
+
+
+    static class DiagSignalHandler implements SignalHandler {
+        private SignalHandler oldHandler;
+
+        // Static method to install the signal handler
+        public static DiagSignalHandler install(String signalName) {
+            Signal diagSignal = new Signal(signalName);
+            DiagSignalHandler diagHandler = new DiagSignalHandler();
+            diagHandler.oldHandler = Signal.handle(diagSignal, diagHandler);
+
+            return diagHandler;
+        }
+
+        @Override
+        public void handle(Signal sig) {
+            LOGGER.info("Diagnostic Signal handler called for signal " + sig);
+            try {
+
+                // Output information for each thread
+                Thread[] threadArray = new Thread[Thread.activeCount()];
+                int numThreads = Thread.enumerate(threadArray);
+                LOGGER.info("Current threads:");
+                for (int i = 0; i < numThreads; i++) {
+                    LOGGER.info(" " + threadArray[i]);
+                }
+
+                // Chain back to previous handler, if one exists
+                if (oldHandler != SIG_DFL && oldHandler != SIG_IGN) {
+                    oldHandler.handle(sig);
+                }
+            } catch (Exception e) {
+                LOGGER.info("Signal handler failed, reason " + e);
+            }
+
         }
     }
 

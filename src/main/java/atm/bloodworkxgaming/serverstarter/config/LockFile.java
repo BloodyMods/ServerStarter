@@ -13,7 +13,7 @@ public class LockFile {
     public boolean checkShouldInstall(ConfigFile configFile) {
         return !forgeInstalled
                 || !packInstalled
-                || !Objects.equals(forgeVersion, configFile.install.forgeVersion)
+                || (configFile.install.forgeVersion != null && !configFile.install.forgeVersion.isEmpty() && !Objects.equals(forgeVersion, configFile.install.forgeVersion))
                 || !Objects.equals(packUrl, configFile.install.modpackUrl);
     }
 }

@@ -121,6 +121,7 @@ public class CursePackType implements IPackType {
         FileUtils.deleteDirectory(new File(basePath + "mods/"));
         LOGGER.info("Deleted the mods folder");
 
+        LOGGER.info("Starting to unzip files.");
         // unzip start
         try (ZipInputStream zis = new ZipInputStream(new FileInputStream(downloadedPack));) {
             ZipEntry entry = zis.getNextEntry();
@@ -164,7 +165,7 @@ public class CursePackType implements IPackType {
                         File newFolder = new File(basePath + entry.getName().substring(10));
                         FileUtils.deleteDirectory(newFolder);
 
-                        LOGGER.info("FOLDER Deleted: " + newFolder.getAbsolutePath());
+                        LOGGER.info("Folder deleted: " + newFolder.getAbsolutePath(), true);
                     }
                 }
 
@@ -177,6 +178,8 @@ public class CursePackType implements IPackType {
         } catch (IOException e) {
             LOGGER.error("Could not unzip files", e);
         }
+
+        LOGGER.info("Done unzipping the files.");
     }
 
     private void handleManifest() throws IOException {
@@ -195,7 +198,7 @@ public class CursePackType implements IPackType {
             if (forgeVersion == null) {
                 JsonArray loaders = mcObj.getAsJsonArray("modLoaders");
                 if (loaders.size() > 0) {
-                    forgeVersion = loaders.get(0).getAsJsonObject().getAsJsonPrimitive("id").getAsString();
+                    forgeVersion = loaders.get(0).getAsJsonObject().getAsJsonPrimitive("id").getAsString().substring(6);
                 }
             }
 
@@ -245,7 +248,9 @@ public class CursePackType implements IPackType {
             array.add(objMod);
         }
         request.add("addOnFileKeys", array);
-        LOGGER.info("About to make a request to cursemeta with body: " + request.toString());
+
+        LOGGER.info("Requesting Download links from cursemeta.");
+        LOGGER.info("About to make a request to cursemeta with body: " + request.toString(), true);
 
         try {
             HttpResponse<JsonNode> res = Unirest
@@ -335,7 +340,7 @@ public class CursePackType implements IPackType {
             FileUtils.copyURLToFile(
                     uri.toURL(),
                     new File(basePath + "mods/" + modName));
-            LOGGER.info("[" + counter.incrementAndGet() + "/" + totalCount + "] Downloaded mod: " + modName);
+            LOGGER.info("[" + String.format("% 3d", counter.incrementAndGet()) + "/" + totalCount + "] Downloaded mod: " + modName);
         } catch (IOException e) {
             fallbackList.add(mod);
             e.printStackTrace();
