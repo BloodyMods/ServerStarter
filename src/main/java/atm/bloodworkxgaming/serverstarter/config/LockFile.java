@@ -1,7 +1,12 @@
 package atm.bloodworkxgaming.serverstarter.config;
 
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+
 import java.util.Objects;
 
+@EqualsAndHashCode
+@ToString
 public class LockFile {
     public boolean forgeInstalled = false;
     public boolean packInstalled = false;
