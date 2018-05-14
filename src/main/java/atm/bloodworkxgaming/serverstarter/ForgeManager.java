@@ -28,13 +28,13 @@ public class ForgeManager {
 
         try {
             if (timerString.endsWith("h"))
-                _crashTimer = Long.valueOf(timerString.substring(0, timerString.length() - 1)) * 60 * 69;
+                _crashTimer = Long.parseLong(timerString.substring(0, timerString.length() - 1)) * 60 * 60;
             else if (timerString.endsWith("min"))
-                _crashTimer = Long.valueOf(timerString.substring(0, timerString.length() - 3)) * 60;
+                _crashTimer = Long.parseLong(timerString.substring(0, timerString.length() - 3)) * 60;
             else if (timerString.endsWith("s"))
-                _crashTimer = Long.valueOf(timerString.substring(0, timerString.length() - 1));
+                _crashTimer = Long.parseLong(timerString.substring(0, timerString.length() - 1));
             else
-                _crashTimer = Long.valueOf(timerString);
+                _crashTimer = Long.parseLong(timerString);
         } catch (NumberFormatException e) {
             LOGGER.error("Invalid crash time format given", e);
         }
@@ -83,7 +83,7 @@ public class ForgeManager {
 
 
             if (lines.size() > 2 && !lines.get(2).contains("true")) {
-                try (Scanner scanner = new Scanner(System.in)) {
+                try (Scanner scanner = new Scanner(System.in, "utf-8")) {
 
                     LOGGER.info("You have not accepted the eula yet.");
                     LOGGER.info("By typing TRUE you are indicating your agreement to the EULA of Mojang.");

@@ -6,7 +6,7 @@ import atm.bloodworkxgaming.serverstarter.packtype.curse.CursePackType;
 import java.util.HashMap;
 
 public class TypeFactory {
-    public static final HashMap<String, IPackTypeFactory> packtype = new HashMap<>();
+    private static final HashMap<String, IPackTypeFactory> packtype = new HashMap<>();
 
     static {
         registerPackType("curse", CursePackType::new);

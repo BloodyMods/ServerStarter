@@ -123,7 +123,7 @@ public class CursePackType implements IPackType {
 
         LOGGER.info("Starting to unzip files.");
         // unzip start
-        try (ZipInputStream zis = new ZipInputStream(new FileInputStream(downloadedPack));) {
+        try (ZipInputStream zis = new ZipInputStream(new FileInputStream(downloadedPack))) {
             ZipEntry entry = zis.getNextEntry();
 
             byte[] buffer = new byte[1024];
@@ -185,7 +185,7 @@ public class CursePackType implements IPackType {
     private void handleManifest() throws IOException {
         List<ModEntryRaw> mods = new ArrayList<>();
 
-        try (FileReader reader = new FileReader(new File(basePath + "manifest.json"))) {
+        try (InputStreamReader reader = new InputStreamReader(new FileInputStream(new File(basePath + "manifest.json")), "utf-8")) {
             JsonObject json = new JsonParser().parse(reader).getAsJsonObject();
             LOGGER.info("manifest JSON Object: " + json, true);
             JsonObject mcObj = json.getAsJsonObject("minecraft");

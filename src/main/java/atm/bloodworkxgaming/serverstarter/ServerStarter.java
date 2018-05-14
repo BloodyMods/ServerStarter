@@ -12,10 +12,7 @@ import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.representer.Representer;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 
 
 public class ServerStarter {
@@ -90,11 +87,15 @@ public class ServerStarter {
      */
     public static ConfigFile readConfig() {
         Yaml yaml = new Yaml(new Constructor(ConfigFile.class), rep, options);
-        try {
-            return yaml.load(new FileInputStream(new File("server-setup-config.yaml")));
+        try (InputStream input = new FileInputStream(new File("server-setup-config.yaml"))){
+            return yaml.load(input);
         } catch (FileNotFoundException e) {
             LOGGER.error("There is no config file given.", e);
-            throw new RuntimeException("No config file given.");
+            throw new RuntimeException("No config file given.", e);
+        } catch (IOException e) {
+            e.printStackTrace();
+            LOGGER.error("Could not read config file.", e);
+            throw new RuntimeException("Failed to read config file", e);
         }
     }
 
@@ -106,10 +107,13 @@ public class ServerStarter {
         File file = new File("serverstarter.lock");
 
         if (file.exists()) {
-            try {
-                return yaml.load(new FileInputStream(file));
+            try (InputStream stream = new FileInputStream(file)){
+                return yaml.load(stream);
             } catch (FileNotFoundException e) {
                 return new LockFile();
+            } catch (IOException e) {
+                LOGGER.error("Error while reading Lock file", e);
+                throw new RuntimeException("Error while reading Lock file", e);
             }
         } else {
             return new LockFile();
