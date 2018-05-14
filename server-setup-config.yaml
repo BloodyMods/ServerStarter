@@ -62,6 +62,9 @@ install:
   # This makes the program check the folder for whether it is supposed to use the
   checkFolder: yes
 
+  # Whether to install Forge or not, should always be yes/true unless you only want to install the pack
+  installForge: yes
+
 
 
 

@@ -23,6 +23,7 @@ public class InstallConfig {
     public List<LocalFile> localFiles;
 
     public boolean checkFolder;
+    public boolean installForge;
 
     @SuppressWarnings("unchecked")
     public <T> T getFormatSpecificSettingOrDefault(String name, T fallback) {

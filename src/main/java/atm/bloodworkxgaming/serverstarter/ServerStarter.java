@@ -59,9 +59,12 @@ public class ServerStarter {
             saveLockFile(lockFile);
 
 
-            String forgeVersion = packtype.getForgeVersion();
-            String mcVersion = packtype.getMCVersion();
-            forgeManager.installForge(config.install.baseInstallPath, forgeVersion, mcVersion);
+            if (config.install.installForge) {
+                String forgeVersion = packtype.getForgeVersion();
+                String mcVersion = packtype.getMCVersion();
+                forgeManager.installForge(config.install.baseInstallPath, forgeVersion, mcVersion);
+            }
+
 
             FileManager filemanger = new FileManager(config);
             filemanger.installAdditionalFiles();
@@ -87,7 +90,7 @@ public class ServerStarter {
      */
     public static ConfigFile readConfig() {
         Yaml yaml = new Yaml(new Constructor(ConfigFile.class), rep, options);
-        try (InputStream input = new FileInputStream(new File("server-setup-config.yaml"))){
+        try (InputStream input = new FileInputStream(new File("server-setup-config.yaml"))) {
             return yaml.load(input);
         } catch (FileNotFoundException e) {
             LOGGER.error("There is no config file given.", e);
@@ -107,7 +110,7 @@ public class ServerStarter {
         File file = new File("serverstarter.lock");
 
         if (file.exists()) {
-            try (InputStream stream = new FileInputStream(file)){
+            try (InputStream stream = new FileInputStream(file)) {
                 return yaml.load(stream);
             } catch (FileNotFoundException e) {
                 return new LockFile();

@@ -11,6 +11,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static atm.bloodworkxgaming.serverstarter.ServerStarter.*;
@@ -21,7 +22,7 @@ public class FileManager {
 
     public FileManager(ConfigFile configFile) {
         this.configFile = configFile;
-        addionalFiles = configFile.install.additionalFiles;
+        addionalFiles = configFile.install.additionalFiles != null ? configFile.install.additionalFiles : Collections.emptyList();
     }
 
     public void installAdditionalFiles() {
