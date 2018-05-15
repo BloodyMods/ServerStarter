@@ -43,6 +43,11 @@ public class ServerStarter {
             return;
         }
 
+        if (!InternetChecker.checkConnection() && config.launch.checkOffline) {
+            LOGGER.error("Problems with the Internet connection, shutting down.");
+            return;
+        }
+
         ForgeManager forgeManager = new ForgeManager(config);
 
 

@@ -151,10 +151,20 @@ public class ForgeManager {
             arguments.add("java");
             arguments.addAll(configFile.launch.javaArgs);
             arguments.add("-Xmx" + configFile.launch.maxRam);
+            try {
+                int xmx = Integer.parseInt(configFile.launch.maxRam.substring(0, configFile.launch.maxRam.length() - 1));
+                int xms = Math.max(1, xmx / 2);
+                arguments.add("-Xms" + xms + configFile.launch.maxRam.substring(configFile.launch.maxRam.length() - 1));
+
+            } catch (NumberFormatException e) {
+                LOGGER.error("Problem while calculating XMS", e);
+            }
+
 
             Collections.addAll(arguments, "-jar", forgeUniversal.getAbsolutePath());
             arguments.add("nogui");
 
+            LOGGER.info("Using arguments: " + arguments.toString(), true);
             LOGGER.info("Starting Forge, output incoming");
             LOGGER.info("For output of this check the server log", true);
             Process process = new ProcessBuilder(arguments)
