@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id "com.github.johnrengelman.shadow" version "2.0.4"
+    id "com.github.breadmoirai.github-release" version "2.0.1"
 }
 
 group = 'atm.bloodworkxgaming'
@@ -62,3 +63,27 @@ task packageDist(type: Copy) {
     filter { it.replaceAll("@@serverstarter-libVersion@@", version as String) }
 }
 
+task zipDist (type: Zip) {
+    dependsOn packageDist
+    group = "build"
+
+    from file("$buildDir/dist/serverstarter-$version/")
+    include '*'
+    include '*/**'
+    archiveName = "serverstarter-${version}.zip"
+    destinationDir = file("$buildDir/release/")
+}
+
+
+githubRelease {
+    token = getGithubKey()
+    owner = "AllTheMods"
+    repo = "ServerStarter"
+}
+
+
+static String getGithubKey(){
+    Properties props = new Properties()
+    props.load(new FileInputStream(new File('secrets.properties')))
+    return props['GITHUB_TOKEN']
+}

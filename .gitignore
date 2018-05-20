@@ -17,3 +17,4 @@ gradle-app.setting
 /setup/
 /test/
 /serverstarter.log
+/secrets.properties
