@@ -79,8 +79,11 @@ githubRelease {
     token = getGithubKey()
     owner = "AllTheMods"
     repo = "ServerStarter"
+
+    releaseAssets = file("$buildDir/release/serverstarter-${version}.zip")
 }
 
+tasks.githubRelease.dependsOn zipDist
 
 static String getGithubKey(){
     Properties props = new Properties()
