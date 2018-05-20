@@ -33,6 +33,7 @@ public class ServerStarter {
         ConfigFile config = readConfig().normalize();
         lockFile = readLockFile();
 
+
         boolean installOnly = args.length > 0 && args[0].equals("install");
 
         LOGGER.info("ConfigFile: " + config, true);
@@ -42,6 +43,23 @@ public class ServerStarter {
             LOGGER.error("One file is null: config: " + config + " lock: " + lockFile);
             return;
         }
+
+
+        LOGGER.info("::::::::::::::::::::::::::::::::::::::::::::::::::::");
+        LOGGER.info("   Minecraft-Forge Server install/launcher jar");
+        LOGGER.info("   (Created by the \"All The Mods\" modpack team)");
+        LOGGER.info("::::::::::::::::::::::::::::::::::::::::::::::::::::\n");
+
+        LOGGER.info("   This jar will launch a Minecraft Forge Modded server");
+        LOGGER.info("");
+        LOGGER.info("   ECHO FOR HELP (or more details);");
+        LOGGER.info("   Github:   https://github.com/AllTheMods/ServerStarter");
+        LOGGER.info("   Discord:  http://discord.allthepacks.com\n");
+
+        LOGGER.info("You are playing " + config.modpack.name);
+        LOGGER.info("Starting to install/launch the server, lean back!");
+        LOGGER.info("#########################################################\n");
+
 
         if (!InternetChecker.checkConnection() && config.launch.checkOffline) {
             LOGGER.error("Problems with the Internet connection, shutting down.");
