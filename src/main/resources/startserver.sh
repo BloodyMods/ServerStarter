@@ -1,1 +1,1 @@
-java -d64 -jar serverstarter.jar
+java -d64 -jar serverstarter-@@serverstarter-libVersion@@.jar
