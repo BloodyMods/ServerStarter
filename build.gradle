@@ -80,7 +80,7 @@ githubRelease {
     owner = "AllTheMods"
     repo = "ServerStarter"
 
-    releaseAssets = file("$buildDir/release/serverstarter-${version}.zip")
+    releaseAssets file("$buildDir/release/serverstarter-${version}.zip")
 }
 
 tasks.githubRelease.dependsOn zipDist
