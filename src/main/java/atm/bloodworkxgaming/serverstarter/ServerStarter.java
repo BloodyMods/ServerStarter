@@ -73,6 +73,7 @@ public class ServerStarter {
 
             FileManager filemanger = new FileManager(config);
             filemanger.installAdditionalFiles();
+            filemanger.installLocalFiles();
 
 
         } else {

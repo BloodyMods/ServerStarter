@@ -40,24 +40,25 @@ install:
   baseInstallPath: setup/
 
   # a list of files which are supposed to be ignored when installing it from the client files
-  # this is supposed to support regex
+  # this can either use regex or glob {default glob: https://docs.oracle.com/javase/8/docs/api/java/nio/file/FileSystem.html#getPathMatcher-java.lang.String-}
+  # specify with regex:.... or glob:.... if you want to force a matching type
   ignoreFiles:
-    - ./mods/optifine.*.jar
-    - ./resources/**
+    - mods/optifine*.jar
+    - resources/**
 
   # often a server needs more files, which are nearly useless on the client, such as tickprofiler
   # This is a list of files, each ' - ' is a new file:
   # url is the directlink to the file, destination is the path to where the file should be copied to
   additionalFiles:
     - url: https://minecraft.curseforge.com/projects/tickprofiler/files/2536494/download
-      destination: ./mods/TickProfiler-1.12-0.0.4.jar
+      destination: mods/TickProfiler-1.12-0.0.4.jar
     - url: https://minecraft.curseforge.com/projects/blooddebug/files/2514858/download
-      destination: ./mods/BloodDebug-1.12.2-0.0.1-9.jar
+      destination: mods/BloodDebug-1.12.2-0.0.1-9.jar
 
   # For often there are config which the user wants to change, here is the place to put the local path to configs, jars or whatever
   localFiles:
-    - from: ../custommods/discord-chat.jar
-      to: ./mods/discord-chat.jar
+    - from: test/All+the+Mods+3-v5.9.5.zip
+      to: setup/test/All+the+Mods+3-v5.9.5.zip
 
   # This makes the program check the folder for whether it is supposed to use the
   checkFolder: yes

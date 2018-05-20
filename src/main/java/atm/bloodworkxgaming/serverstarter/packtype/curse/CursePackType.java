@@ -18,15 +18,19 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 
 import java.io.*;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
+import java.nio.file.PathMatcher;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -37,12 +41,14 @@ public class CursePackType implements IPackType {
     private String basePath;
     private String forgeVersion;
     private String mcVersion;
+    private File oldFiles;
 
     public CursePackType(ConfigFile configFile) {
         this.configFile = configFile;
         basePath = configFile.install.baseInstallPath;
         forgeVersion = configFile.install.forgeVersion;
         mcVersion = configFile.install.mcVersion;
+        oldFiles = new File(basePath + "OLD_TO_DELETE/");
     }
 
     @Override
@@ -53,7 +59,18 @@ public class CursePackType implements IPackType {
                 url += "/download";
 
             try {
-                unzipFile(downloadPack(url));
+                List<PathMatcher> patterns = configFile.install.ignoreFiles
+                        .stream()
+                        .map(s -> {
+                            if (s.startsWith("glob:") || s.startsWith("regex:"))
+                                return s;
+                            else
+                                return "glob:" + s;
+                        })
+                        .map(FileSystems.getDefault()::getPathMatcher)
+                        .collect(Collectors.toList());
+
+                unzipFile(downloadPack(url), patterns);
                 // unzipFile(new File(basePath + "modpack-download.zip"));
                 handleManifest();
 
@@ -116,10 +133,15 @@ public class CursePackType implements IPackType {
         }
     }
 
-    private void unzipFile(File downloadedPack) throws IOException {
+    private void unzipFile(File downloadedPack, List<PathMatcher> patterns) throws IOException {
+        // delete old installer folder
+        FileUtils.deleteDirectory(oldFiles);
+
         // start with deleting the mods folder as it is not garanteed to have override mods
-        FileUtils.deleteDirectory(new File(basePath + "mods/"));
-        LOGGER.info("Deleted the mods folder");
+        File modsFolder = new File(basePath + "mods/");
+        if (modsFolder.exists())
+            FileUtils.moveDirectory(modsFolder, new File(oldFiles, "mods"));
+        LOGGER.info("Moved the mods folder");
 
         LOGGER.info("Starting to unzip files.");
         // unzip start
@@ -148,8 +170,18 @@ public class CursePackType implements IPackType {
 
                 // overrides
                 if (name.startsWith("overrides/")) {
+
+                    String path = entry.getName().substring(10);
+                    Path p = Paths.get(path);
+                    if (patterns.stream().anyMatch(pattern -> pattern.matches(p))) {
+                        LOGGER.info("Skipping " + path + " as it is on the ignore List.", true);
+
+                        entry = zis.getNextEntry();
+                        continue;
+                    }
+
                     if (!name.endsWith("/")) {
-                        File outfile = new File(basePath + entry.getName().substring(10));
+                        File outfile = new File(basePath + path);
                         LOGGER.info("Copying zip entry to = " + outfile, true);
                         //noinspection ResultOfMethodCallIgnored
                         new File(outfile.getParent()).mkdirs();
@@ -162,10 +194,11 @@ public class CursePackType implements IPackType {
                         }
 
                     } else if (!name.equals("overrides/")) {
-                        File newFolder = new File(basePath + entry.getName().substring(10));
-                        FileUtils.deleteDirectory(newFolder);
+                        File newFolder = new File(basePath + path);
+                        if (newFolder.exists())
+                            FileUtils.moveDirectory(newFolder, new File(oldFiles, path));
 
-                        LOGGER.info("Folder deleted: " + newFolder.getAbsolutePath(), true);
+                        LOGGER.info("Folder moved: " + newFolder.getAbsolutePath(), true);
                     }
                 }
 

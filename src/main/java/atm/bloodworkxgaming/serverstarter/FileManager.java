@@ -2,6 +2,7 @@ package atm.bloodworkxgaming.serverstarter;
 
 import atm.bloodworkxgaming.serverstarter.config.AddionalFile;
 import atm.bloodworkxgaming.serverstarter.config.ConfigFile;
+import atm.bloodworkxgaming.serverstarter.config.LocalFile;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -47,6 +48,18 @@ public class FileManager {
         }
     }
 
+
+    public void installLocalFiles() {
+        LOGGER.info("Starting to copy local files.");
+        for (LocalFile localFile : configFile.install.localFiles) {
+            LOGGER.info("Copying localfile: " + localFile);
+            try {
+                FileUtils.copyFile(new File(localFile.from), new File(localFile.to));
+            } catch (IOException e) {
+                LOGGER.error("Error while copying local file", e);
+            }
+        }
+    }
 
     public static URL cleanUrl(String url) throws URISyntaxException, MalformedURLException {
         int sOrNotIndex = url.indexOf("/");

@@ -61,7 +61,8 @@ public class PrimitiveLogger {
         try {
             FileUtils.write(outputFile, message, "utf-8", true);
         } catch (IOException e) {
-            error("Error while logging!", e);
+            System.err.println("Error while logging!");
+            e.printStackTrace();
         }
 
         System.out.print(message);
