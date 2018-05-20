@@ -30,7 +30,7 @@ IF %ERRORLEVEL% EQU 0 (
 
 
 :MAIN
-java -d64 -jar serverstarter.jar
+java -d64 -jar serverstarter-@@serverstarter-libVersion@@.jar
 GOTO EOF
 
 

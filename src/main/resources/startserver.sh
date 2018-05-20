@@ -1,0 +1,1 @@
+java -d64 -jar serverstarter.jar

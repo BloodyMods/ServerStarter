@@ -3,8 +3,8 @@ plugins {
     id "com.github.johnrengelman.shadow" version "2.0.4"
 }
 
-group 'atm.bloodworkxgaming'
-version '1.0-SNAPSHOT'
+group = 'atm.bloodworkxgaming'
+version = '1.0'
 
 sourceCompatibility = 1.8
 
@@ -39,3 +39,17 @@ jar {
 
 tasks.build.dependsOn shadowJar
 
+task packageDist (type: Copy) {
+    group = "build"
+    dependsOn build
+
+    from file("$buildDir/libs/serverstarter-${version}.jar")
+    from file("src/main/resources/startserver.bat")
+    from file("src/main/resources/startserver.sh")
+    from file("server-setup-config.yaml")
+
+
+    into file ("$buildDir/dist/serverstarter-$version/")
+
+    filter{ it.replaceAll("@@serverstarter-libVersion@@", version as String)}
+}
