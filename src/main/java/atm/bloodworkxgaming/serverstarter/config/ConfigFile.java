@@ -13,7 +13,8 @@ public class ConfigFile {
     public LaunchSettings launch;
 
     public ConfigFile normalize(){
-        if (install.baseInstallPath == null) install.baseInstallPath = "";
+        install = install.normalize();
+        launch = launch.normalize();
 
         return this;
     }

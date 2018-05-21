@@ -6,6 +6,7 @@ import atm.bloodworkxgaming.serverstarter.logger.PrimitiveLogger;
 import atm.bloodworkxgaming.serverstarter.packtype.IPackType;
 import atm.bloodworkxgaming.serverstarter.packtype.TypeFactory;
 import org.apache.commons.io.FileUtils;
+import org.fusesource.jansi.AnsiConsole;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
@@ -13,6 +14,9 @@ import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.representer.Representer;
 
 import java.io.*;
+
+import static org.fusesource.jansi.Ansi.Color.*;
+import static org.fusesource.jansi.Ansi.*;
 
 
 public class ServerStarter {
@@ -32,7 +36,7 @@ public class ServerStarter {
     public static void main(String[] args) {
         ConfigFile config = readConfig().normalize();
         lockFile = readLockFile();
-
+        AnsiConsole.systemInstall();
 
         boolean installOnly = args.length > 0 && args[0].equals("install");
 
@@ -44,21 +48,20 @@ public class ServerStarter {
             return;
         }
 
-
-        LOGGER.info("::::::::::::::::::::::::::::::::::::::::::::::::::::");
-        LOGGER.info("   Minecraft-Forge Server install/launcher jar");
-        LOGGER.info("   (Created by the \"All The Mods\" modpack team)");
-        LOGGER.info("::::::::::::::::::::::::::::::::::::::::::::::::::::\n");
-
+        LOGGER.info(ansi().fgRed().a("::::::::::::::::::::::::::::::::::::::::::::::::::::"));
+        LOGGER.info(ansi().fgBrightBlue().a("   Minecraft-Forge Server install/launcher jar"));
+        LOGGER.info(ansi().fgBrightBlue().a("   (Created by the ").fgGreen().a("\"All The Mods\"").fgBrightBlue().a(" modpack team)"));
+        LOGGER.info(ansi().fgRed().a("::::::::::::::::::::::::::::::::::::::::::::::::::::"));
+        LOGGER.info("");
         LOGGER.info("   This jar will launch a Minecraft Forge Modded server");
         LOGGER.info("");
-        LOGGER.info("   ECHO FOR HELP (or more details);");
-        LOGGER.info("   Github:   https://github.com/AllTheMods/ServerStarter");
-        LOGGER.info("   Discord:  http://discord.allthepacks.com\n");
-
-        LOGGER.info("You are playing " + config.modpack.name);
+        LOGGER.info(ansi().a("   Github:    ").fgBrightBlue().a("https://github.com/AllTheMods/ServerStarter"));
+        LOGGER.info(ansi().a("   Discord:   ").fgBrightBlue().a("http://discord.allthepacks.com"));
+        LOGGER.info("");
+        LOGGER.info(ansi().a("You are playing ").fgGreen().a(config.modpack.name));
         LOGGER.info("Starting to install/launch the server, lean back!");
-        LOGGER.info("#########################################################\n");
+        LOGGER.info(ansi().fgRed().a("::::::::::::::::::::::::::::::::::::::::::::::::::::"));
+        LOGGER.info("");
 
 
         if (!InternetChecker.checkConnection() && config.launch.checkOffline) {

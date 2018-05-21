@@ -3,6 +3,7 @@ package atm.bloodworkxgaming.serverstarter.config;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -28,5 +29,15 @@ public class InstallConfig {
     @SuppressWarnings("unchecked")
     public <T> T getFormatSpecificSettingOrDefault(String name, T fallback) {
         return formatSpecific == null ? fallback : (T) formatSpecific.getOrDefault(name, fallback);
+    }
+
+    public InstallConfig normalize() {
+        if (baseInstallPath == null) baseInstallPath = "";
+        if (ignoreFiles == null) ignoreFiles = Collections.emptyList();
+        if (additionalFiles == null) additionalFiles = Collections.emptyList();
+        if (localFiles == null) localFiles = Collections.emptyList();
+
+
+        return this;
     }
 }

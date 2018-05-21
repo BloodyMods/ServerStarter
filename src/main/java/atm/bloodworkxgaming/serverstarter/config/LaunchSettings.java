@@ -3,6 +3,7 @@ package atm.bloodworkxgaming.serverstarter.config;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
+import java.util.Collections;
 import java.util.List;
 
 @EqualsAndHashCode
@@ -16,4 +17,10 @@ public class LaunchSettings {
     public int crashLimit;
     public String crashTimer;
     public List<String> javaArgs;
+
+    public LaunchSettings normalize(){
+        if (javaArgs == null) javaArgs = Collections.emptyList();
+
+        return this;
+    }
 }
