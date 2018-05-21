@@ -2,6 +2,7 @@ package atm.bloodworkxgaming.serverstarter;
 
 import atm.bloodworkxgaming.serverstarter.config.ConfigFile;
 import org.apache.commons.io.FileUtils;
+import org.fusesource.jansi.Ansi;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,6 +14,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 import static atm.bloodworkxgaming.serverstarter.ServerStarter.*;
+import static org.fusesource.jansi.Ansi.ansi;
 
 public class ForgeManager {
     private ConfigFile configFile;
@@ -85,9 +87,9 @@ public class ForgeManager {
             if (lines.size() > 2 && !lines.get(2).contains("true")) {
                 try (Scanner scanner = new Scanner(System.in, "utf-8")) {
 
-                    LOGGER.info("You have not accepted the eula yet.");
-                    LOGGER.info("By typing TRUE you are indicating your agreement to the EULA of Mojang.");
-                    LOGGER.info("Read it at https://account.mojang.com/documents/minecraft_eula before accepting it.");
+                    LOGGER.info(ansi().fgCyan().a("You have not accepted the eula yet."));
+                    LOGGER.info(ansi().fgCyan().a("By typing TRUE you are indicating your agreement to the EULA of Mojang."));
+                    LOGGER.info(ansi().fgCyan().a("Read it at https://account.mojang.com/documents/minecraft_eula before accepting it."));
 
                     String answer = scanner.nextLine();
                     if (answer.trim().equalsIgnoreCase("true")) {

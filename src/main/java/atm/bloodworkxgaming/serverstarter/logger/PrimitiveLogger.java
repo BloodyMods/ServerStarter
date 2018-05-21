@@ -44,7 +44,7 @@ public class PrimitiveLogger {
     }
 
     public void warn(Object message) {
-        String m = currentTimeAnsi().bgMagenta().a("[WARNING] ").bgDefault().a(message).reset().newline().toString();
+        String m = currentTimeAnsi().fgMagenta().a("[WARNING] ").bgDefault().a(message).reset().newline().toString();
 
         try {
             FileUtils.write(outputFile, stripColors(m), "utf-8", true);
@@ -56,7 +56,7 @@ public class PrimitiveLogger {
     }
 
     public void error(String message, Throwable throwable) {
-        String m = currentTimeAnsi().bgRed().a("[ERROR] ").bgDefault().a(message).reset().newline().toString();
+        String m = currentTimeAnsi().fgRed().a("[ERROR] ").bgDefault().a(message).reset().newline().toString();
 
         if (throwable != null) {
             throwable.printStackTrace();
@@ -85,6 +85,6 @@ public class PrimitiveLogger {
     }
 
     private Ansi currentTimeAnsi() {
-        return ansi().fgBrightBlack().a("[" + LocalTime.now().format(dateTimeFormatter) + "] ").fgDefault();
+            return ansi().fgBrightBlack().a("[" + LocalTime.now().format(dateTimeFormatter) + "] ").fgDefault();
     }
 }
