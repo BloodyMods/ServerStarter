@@ -24,10 +24,8 @@ import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -266,6 +264,64 @@ public class CursePackType implements IPackType {
                     ignoreSet.add(String.valueOf(o));
             }
 
+
+        ConcurrentLinkedQueue<String> urls = new ConcurrentLinkedQueue<>();
+
+        LOGGER.info("Requesting Download links from cursemeta.");
+
+        mods.parallelStream().forEach(mod -> {
+            if (!ignoreSet.isEmpty() && ignoreSet.contains(mod.projectID)) {
+                LOGGER.info("Skipping mod with projectID: " + mod.projectID);
+                return;
+            }
+
+            String url = configFile.install.getFormatSpecificSettingOrDefault("cursemeta", "https://cursemeta.dries007.net")
+                    + "/" + mod.projectID + "/" + mod.fileID + ".json";
+            LOGGER.info("Download url is: " + url, true);
+
+            try {
+                HttpResponse<JsonNode> res = Unirest
+                        .get(url)
+                        .header("User-Agent", "All the mods server installer.")
+                        .header("Content-Type", "application/json")
+                        .asJson();
+
+                if (res.getStatus() != 200)
+                    throw new UnirestException("Response was not OK");
+
+                JsonObject jsonRes = new JsonParser().parse(res.getBody().toString()).getAsJsonObject();
+                LOGGER.info("Response from manifest query: " + jsonRes, true);
+
+                urls.add(jsonRes
+                        .getAsJsonObject()
+                        .getAsJsonPrimitive("DownloadURL").getAsString());
+
+            } catch (UnirestException e) {
+                LOGGER.error("Error while trying to get URL from cursemeta for mod " + mod.projectID, e);
+            }
+        });
+
+        LOGGER.info("Mods to download: " + urls, true);
+
+        processMods(urls);
+
+    }
+
+    //region >>>>>>> Stuff for when cursemeta works again:
+    /*
+    private void downloadMods(List<ModEntryRaw> mods) {
+        Set<String> ignoreSet = new HashSet<>();
+        List<Object> ignoreListTemp = configFile.install.getFormatSpecificSettingOrDefault("ignoreProject", null);
+
+        if (ignoreListTemp != null)
+            for (Object o : ignoreListTemp) {
+                if (o instanceof String)
+                    ignoreSet.add((String) o);
+
+                if (o instanceof Integer)
+                    ignoreSet.add(String.valueOf(o));
+            }
+
         // constructs the body
         JsonObject request = new JsonObject();
         JsonArray array = new JsonArray();
@@ -315,7 +371,8 @@ public class CursePackType implements IPackType {
         } catch (UnirestException e) {
             e.printStackTrace();
         }
-    }
+    }*/
+    //endregion
 
     /**
      * Downloads all mods, with a second fallback if failed
@@ -323,7 +380,7 @@ public class CursePackType implements IPackType {
      *
      * @param mods List of urls
      */
-    private void processMods(List<String> mods) {
+    private void processMods(Collection<String> mods) {
         // constructs the ignore list
         List<Pattern> ignorePatterns = new ArrayList<>();
         for (String ignoreFile : configFile.install.ignoreFiles) {

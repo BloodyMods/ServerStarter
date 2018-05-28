@@ -15,8 +15,7 @@ import org.yaml.snakeyaml.representer.Representer;
 
 import java.io.*;
 
-import static org.fusesource.jansi.Ansi.Color.*;
-import static org.fusesource.jansi.Ansi.*;
+import static org.fusesource.jansi.Ansi.ansi;
 
 
 public class ServerStarter {
