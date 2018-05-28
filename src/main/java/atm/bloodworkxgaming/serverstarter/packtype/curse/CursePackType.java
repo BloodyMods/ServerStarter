@@ -16,6 +16,7 @@ import lombok.Getter;
 import lombok.ToString;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
 
 import java.io.*;
 import java.net.URISyntaxException;
@@ -181,8 +182,11 @@ public class CursePackType implements IPackType {
                     if (!name.endsWith("/")) {
                         File outfile = new File(basePath + path);
                         LOGGER.info("Copying zip entry to = " + outfile, true);
+
                         //noinspection ResultOfMethodCallIgnored
-                        new File(outfile.getParent()).mkdirs();
+                        String parent = outfile.getParent();
+                        if (parent != null)
+                            new File(parent).mkdirs();
 
                         try (FileOutputStream fos = new FileOutputStream(outfile)) {
                             int len;

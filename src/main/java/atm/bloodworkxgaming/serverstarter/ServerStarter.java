@@ -33,79 +33,83 @@ public class ServerStarter {
     }
 
     public static void main(String[] args) {
-        ConfigFile config = readConfig().normalize();
-        lockFile = readLockFile();
-        AnsiConsole.systemInstall();
+        try {
+            ConfigFile config = readConfig().normalize();
+            lockFile = readLockFile();
+            AnsiConsole.systemInstall();
 
-        boolean installOnly = args.length > 0 && args[0].equals("install");
+            boolean installOnly = args.length > 0 && args[0].equals("install");
 
-        LOGGER.info("ConfigFile: " + config, true);
-        LOGGER.info("LockFile: " + lockFile, true);
+            LOGGER.info("ConfigFile: " + config, true);
+            LOGGER.info("LockFile: " + lockFile, true);
 
-        if (config == null || lockFile == null) {
-            LOGGER.error("One file is null: config: " + config + " lock: " + lockFile);
-            return;
-        }
-
-        LOGGER.info(ansi().fgRed().a("::::::::::::::::::::::::::::::::::::::::::::::::::::"));
-        LOGGER.info(ansi().fgBrightBlue().a("   Minecraft-Forge Server install/launcher jar"));
-        LOGGER.info(ansi().fgBrightBlue().a("   (Created by the ").fgGreen().a("\"All The Mods\"").fgBrightBlue().a(" modpack team)"));
-        LOGGER.info(ansi().fgRed().a("::::::::::::::::::::::::::::::::::::::::::::::::::::"));
-        LOGGER.info("");
-        LOGGER.info("   This jar will launch a Minecraft Forge Modded server");
-        LOGGER.info("");
-        LOGGER.info(ansi().a("   Github:    ").fgBrightBlue().a("https://github.com/AllTheMods/ServerStarter"));
-        LOGGER.info(ansi().a("   Discord:   ").fgBrightBlue().a("http://discord.allthepacks.com"));
-        LOGGER.info("");
-        LOGGER.info(ansi().a("You are playing ").fgGreen().a(config.modpack.name));
-        LOGGER.info("Starting to install/launch the server, lean back!");
-        LOGGER.info(ansi().fgRed().a("::::::::::::::::::::::::::::::::::::::::::::::::::::"));
-        LOGGER.info("");
-
-
-        if (!InternetChecker.checkConnection() && config.launch.checkOffline) {
-            LOGGER.error("Problems with the Internet connection, shutting down.");
-            return;
-        }
-
-        ForgeManager forgeManager = new ForgeManager(config);
-
-
-        if (lockFile.checkShouldInstall(config) || installOnly) {
-            IPackType packtype = TypeFactory.createPackType(config.install.modpackFormat, config);
-            if (packtype == null) {
-                LOGGER.error("Unknown pack format given in config");
+            if (config == null || lockFile == null) {
+                LOGGER.error("One file is null: config: " + config + " lock: " + lockFile);
                 return;
             }
 
-            packtype.installPack();
-            lockFile.packInstalled = true;
-            lockFile.packUrl = config.install.modpackUrl;
-            saveLockFile(lockFile);
+            LOGGER.info(ansi().fgRed().a("::::::::::::::::::::::::::::::::::::::::::::::::::::"));
+            LOGGER.info(ansi().fgBrightBlue().a("   Minecraft-Forge Server install/launcher jar"));
+            LOGGER.info(ansi().fgBrightBlue().a("   (Created by the ").fgGreen().a("\"All The Mods\"").fgBrightBlue().a(" modpack team)"));
+            LOGGER.info(ansi().fgRed().a("::::::::::::::::::::::::::::::::::::::::::::::::::::"));
+            LOGGER.info("");
+            LOGGER.info("   This jar will launch a Minecraft Forge Modded server");
+            LOGGER.info("");
+            LOGGER.info(ansi().a("   Github:    ").fgBrightBlue().a("https://github.com/AllTheMods/ServerStarter"));
+            LOGGER.info(ansi().a("   Discord:   ").fgBrightBlue().a("http://discord.allthepacks.com"));
+            LOGGER.info("");
+            LOGGER.info(ansi().a("You are playing ").fgGreen().a(config.modpack.name));
+            LOGGER.info("Starting to install/launch the server, lean back!");
+            LOGGER.info(ansi().fgRed().a("::::::::::::::::::::::::::::::::::::::::::::::::::::"));
+            LOGGER.info("");
 
 
-            if (config.install.installForge) {
-                String forgeVersion = packtype.getForgeVersion();
-                String mcVersion = packtype.getMCVersion();
-                forgeManager.installForge(config.install.baseInstallPath, forgeVersion, mcVersion);
+            if (!InternetChecker.checkConnection() && config.launch.checkOffline) {
+                LOGGER.error("Problems with the Internet connection, shutting down.");
+                return;
             }
 
-
-            FileManager filemanger = new FileManager(config);
-            filemanger.installAdditionalFiles();
-            filemanger.installLocalFiles();
+            ForgeManager forgeManager = new ForgeManager(config);
 
 
-        } else {
-            LOGGER.info("Server is already installed to correct version, to force install delete the serverstarter.lock File.");
+            if (lockFile.checkShouldInstall(config) || installOnly) {
+                IPackType packtype = TypeFactory.createPackType(config.install.modpackFormat, config);
+                if (packtype == null) {
+                    LOGGER.error("Unknown pack format given in config");
+                    return;
+                }
+
+                packtype.installPack();
+                lockFile.packInstalled = true;
+                lockFile.packUrl = config.install.modpackUrl;
+                saveLockFile(lockFile);
+
+
+                if (config.install.installForge) {
+                    String forgeVersion = packtype.getForgeVersion();
+                    String mcVersion = packtype.getMCVersion();
+                    forgeManager.installForge(config.install.baseInstallPath, forgeVersion, mcVersion);
+                }
+
+
+                FileManager filemanger = new FileManager(config);
+                filemanger.installAdditionalFiles();
+                filemanger.installLocalFiles();
+
+
+            } else {
+                LOGGER.info("Server is already installed to correct version, to force install delete the serverstarter.lock File.");
+            }
+
+            if (installOnly) {
+                LOGGER.info("Install only mod, exiting now.");
+                return;
+            }
+
+            forgeManager.handleServer();
+        } catch (Throwable e) {
+            LOGGER.error("Some uncaught error happened.", e);
         }
-
-        if (installOnly) {
-            LOGGER.info("Install only mod, exiting now.");
-            return;
-        }
-
-        forgeManager.handleServer();
     }
 
 
