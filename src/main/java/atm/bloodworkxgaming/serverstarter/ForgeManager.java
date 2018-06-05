@@ -150,7 +150,9 @@ public class ForgeManager {
 
             List<String> arguments = new ArrayList<>();
 
-            arguments.add(configFile.launch.preJavaArgs);
+            if (configFile.launch.preJavaArgs != null && !configFile.launch.preJavaArgs.isEmpty())
+                arguments.add(configFile.launch.preJavaArgs);
+
             arguments.add("java");
             arguments.addAll(configFile.launch.javaArgs);
             arguments.add("-Xmx" + configFile.launch.maxRam);
