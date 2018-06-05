@@ -17,9 +17,11 @@ public class LaunchSettings {
     public int crashLimit;
     public String crashTimer;
     public List<String> javaArgs;
+    public String preJavaArgs;
 
     public LaunchSettings normalize(){
         if (javaArgs == null) javaArgs = Collections.emptyList();
+        if (preJavaArgs == null) preJavaArgs = "";
 
         return this;
     }

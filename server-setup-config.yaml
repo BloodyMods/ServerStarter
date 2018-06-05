@@ -90,6 +90,10 @@ launch:
   # syntax is either [number]h or [number]min or [number]s
   crashTimer: 60min
 
+  # Arguments that need to go before the 'java' argument, something like linux niceness
+  # This is only a string, not a list.
+  preJavaArgs: ~
+
   # Java args that are supposed to be used when the server launches
   # keep in mind java args often need ' - ' in front of it to work, use clarifying parentheses to make sure it uses it correctly
   javaArgs:

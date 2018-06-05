@@ -150,16 +150,20 @@ public class ForgeManager {
 
             List<String> arguments = new ArrayList<>();
 
+            arguments.add(configFile.launch.preJavaArgs);
             arguments.add("java");
             arguments.addAll(configFile.launch.javaArgs);
             arguments.add("-Xmx" + configFile.launch.maxRam);
-            try {
-                int xmx = Integer.parseInt(configFile.launch.maxRam.substring(0, configFile.launch.maxRam.length() - 1));
-                int xms = Math.max(1, xmx / 2);
-                arguments.add("-Xms" + xms + configFile.launch.maxRam.substring(configFile.launch.maxRam.length() - 1));
 
-            } catch (NumberFormatException e) {
-                LOGGER.error("Problem while calculating XMS", e);
+            if (configFile.launch.javaArgs.stream().noneMatch(s -> s.trim().startsWith("-Xms"))){
+                try {
+                    int xmx = Integer.parseInt(configFile.launch.maxRam.substring(0, configFile.launch.maxRam.length() - 1));
+                    int xms = Math.max(1, xmx / 2);
+                    arguments.add("-Xms" + xms + configFile.launch.maxRam.substring(configFile.launch.maxRam.length() - 1));
+
+                } catch (NumberFormatException e) {
+                    LOGGER.error("Problem while calculating XMS", e);
+                }
             }
 
 
