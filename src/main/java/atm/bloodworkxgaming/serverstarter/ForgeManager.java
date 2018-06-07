@@ -150,8 +150,10 @@ public class ForgeManager {
 
             List<String> arguments = new ArrayList<>();
 
-            if (configFile.launch.preJavaArgs != null && !configFile.launch.preJavaArgs.isEmpty())
-                arguments.add(configFile.launch.preJavaArgs);
+            if (configFile.launch.preJavaArgs != null && !configFile.launch.preJavaArgs.isEmpty()) {
+                String[] l = configFile.launch.preJavaArgs.trim().split(" ");
+                arguments.addAll(Arrays.asList(l));
+            }
 
             arguments.add("java");
             arguments.addAll(configFile.launch.javaArgs);
