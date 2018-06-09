@@ -66,6 +66,10 @@ install:
   # Whether to install Forge or not, should always be yes/true unless you only want to install the pack
   installForge: yes
 
+  # Sponge bootstrapper jar URL
+  # Only needed if you have spongefix enabled
+  spongeBootstrapper: https://github.com/simon816/SpongeBootstrap/releases/download/v0.6.2/SpongeBootstrap-0.6.2.jar
+
 
 
 

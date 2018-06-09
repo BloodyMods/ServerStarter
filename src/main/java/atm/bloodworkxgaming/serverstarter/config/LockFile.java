@@ -13,6 +13,7 @@ public class LockFile {
     public String forgeVersion = "NONE";
     public String mcVersion = "NONE";
     public String packUrl = "NONE";
+    public String spongeBootstrapper = "NONE";
 
 
     public boolean checkShouldInstall(ConfigFile configFile) {

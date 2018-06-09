@@ -2,7 +2,7 @@ package atm.bloodworkxgaming.serverstarter;
 
 import atm.bloodworkxgaming.serverstarter.config.ConfigFile;
 import org.apache.commons.io.FileUtils;
-import org.fusesource.jansi.Ansi;
+import org.apache.commons.io.FilenameUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -142,11 +142,31 @@ public class ForgeManager {
         }
     }
 
+    public String installSpongeBootstrapper(String basePath) {
+        String filename = FilenameUtils.getName(configFile.install.spongeBootstrapper);
+        File downloadFile = new File(basePath + filename);
+
+        try {
+            FileUtils.copyURLToFile(new URL(configFile.install.spongeBootstrapper), downloadFile);
+        } catch (IOException e) {
+            LOGGER.error("Error while downloading bootstrapper", e);
+        }
+
+        return filename;
+    }
+
     private void startServer() {
 
         try {
-            String filename = "forge-" + lockFile.mcVersion + "-" + lockFile.forgeVersion + "-universal.jar";
-            File forgeUniversal = new File(configFile.install.baseInstallPath + filename);
+
+            String filename;
+
+            if (configFile.launch.spongefix) {
+                filename = lockFile.spongeBootstrapper;
+            } else {
+                filename = "forge-" + lockFile.mcVersion + "-" + lockFile.forgeVersion + "-universal.jar";
+            }
+            File launchJar = new File(configFile.install.baseInstallPath + filename);
 
             List<String> arguments = new ArrayList<>();
 
@@ -159,7 +179,7 @@ public class ForgeManager {
             arguments.addAll(configFile.launch.javaArgs);
             arguments.add("-Xmx" + configFile.launch.maxRam);
 
-            if (configFile.launch.javaArgs.stream().noneMatch(s -> s.trim().startsWith("-Xms"))){
+            if (configFile.launch.javaArgs.stream().noneMatch(s -> s.trim().startsWith("-Xms"))) {
                 try {
                     int xmx = Integer.parseInt(configFile.launch.maxRam.substring(0, configFile.launch.maxRam.length() - 1));
                     int xms = Math.max(1, xmx / 2);
@@ -171,7 +191,7 @@ public class ForgeManager {
             }
 
 
-            Collections.addAll(arguments, "-jar", forgeUniversal.getAbsolutePath());
+            Collections.addAll(arguments, "-jar", launchJar.getAbsolutePath());
             arguments.add("nogui");
 
             LOGGER.info("Using arguments: " + arguments.toString(), true);

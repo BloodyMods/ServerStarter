@@ -32,27 +32,31 @@ public class PrimitiveLogger {
     public void info(Object message, boolean logOnly) {
         String m = currentTimeAnsi().fgYellow().a("[INFO] ").fgDefault().a(message).reset().newline().toString();
 
-        try {
-            FileUtils.write(outputFile, stripColors(m), "utf-8", true);
-        } catch (IOException e) {
-            error("Error while logging!", e);
-        }
+        synchronized (this) {
+            try {
+                FileUtils.write(outputFile, stripColors(m), "utf-8", true);
+            } catch (IOException e) {
+                error("Error while logging!", e);
+            }
 
-        if (!logOnly) {
-            System.out.print(m);
+            if (!logOnly) {
+                System.out.print(m);
+            }
         }
     }
 
     public void warn(Object message) {
         String m = currentTimeAnsi().fgMagenta().a("[WARNING] ").bgDefault().a(message).reset().newline().toString();
 
-        try {
-            FileUtils.write(outputFile, stripColors(m), "utf-8", true);
-        } catch (IOException e) {
-            error("Error while logging!", e);
-        }
+        synchronized (this) {
+            try {
+                FileUtils.write(outputFile, stripColors(m), "utf-8", true);
+            } catch (IOException e) {
+                error("Error while logging!", e);
+            }
 
-        System.out.print(m);
+            System.out.print(m);
+        }
     }
 
     public void error(String message, Throwable throwable) {
@@ -65,15 +69,16 @@ public class PrimitiveLogger {
             m += "\n" + sw.toString();
         }
 
-        try {
-            FileUtils.write(outputFile, stripColors(m), "utf-8", true);
-        } catch (IOException e) {
-            System.err.println("Error while logging!");
-            e.printStackTrace();
+        synchronized (this) {
+            try {
+                FileUtils.write(outputFile, stripColors(m), "utf-8", true);
+            } catch (IOException e) {
+                System.err.println("Error while logging!");
+                e.printStackTrace();
+            }
+
+            System.out.print(m);
         }
-
-        System.out.print(m);
-
     }
 
     public void error(String message) {
@@ -85,6 +90,6 @@ public class PrimitiveLogger {
     }
 
     private Ansi currentTimeAnsi() {
-            return ansi().fgBrightBlack().a("[" + LocalTime.now().format(dateTimeFormatter) + "] ").fgDefault();
+        return ansi().fgBrightBlack().a("[" + LocalTime.now().format(dateTimeFormatter) + "] ").fgDefault();
     }
 }

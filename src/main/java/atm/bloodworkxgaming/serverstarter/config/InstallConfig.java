@@ -26,6 +26,8 @@ public class InstallConfig {
     public boolean checkFolder;
     public boolean installForge;
 
+    public String spongeBootstrapper;
+
     @SuppressWarnings("unchecked")
     public <T> T getFormatSpecificSettingOrDefault(String name, T fallback) {
         return formatSpecific == null ? fallback : (T) formatSpecific.getOrDefault(name, fallback);

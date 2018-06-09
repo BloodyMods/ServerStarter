@@ -91,6 +91,11 @@ public class ServerStarter {
                     forgeManager.installForge(config.install.baseInstallPath, forgeVersion, mcVersion);
                 }
 
+                if (config.launch.spongefix) {
+                    lockFile.spongeBootstrapper = forgeManager.installSpongeBootstrapper(config.install.baseInstallPath);
+                    saveLockFile(lockFile);
+                }
+
 
                 FileManager filemanger = new FileManager(config);
                 filemanger.installAdditionalFiles();
