@@ -1,6 +1,6 @@
 package atm.bloodworkxgaming.serverstarter;
 
-import atm.bloodworkxgaming.serverstarter.config.AddionalFile;
+import atm.bloodworkxgaming.serverstarter.config.AdditionalFile;
 import atm.bloodworkxgaming.serverstarter.config.ConfigFile;
 import atm.bloodworkxgaming.serverstarter.config.LocalFile;
 import org.apache.commons.io.FileUtils;
@@ -19,24 +19,24 @@ import static atm.bloodworkxgaming.serverstarter.ServerStarter.*;
 
 public class FileManager {
     public ConfigFile configFile;
-    public List<AddionalFile> addionalFiles;
+    public List<AdditionalFile> additionalFiles;
 
     public FileManager(ConfigFile configFile) {
         this.configFile = configFile;
-        addionalFiles = configFile.install.additionalFiles != null ? configFile.install.additionalFiles : Collections.emptyList();
+        additionalFiles = configFile.install.additionalFiles != null ? configFile.install.additionalFiles : Collections.emptyList();
     }
 
     public void installAdditionalFiles() {
         LOGGER.info("Starting to installing Additional Files");
-        List<AddionalFile> fallbackList = new ArrayList<>();
-        addionalFiles.parallelStream().forEach(file -> handleAdditionalFile(file, fallbackList));
+        List<AdditionalFile> fallbackList = new ArrayList<>();
+        additionalFiles.parallelStream().forEach(file -> handleAdditionalFile(file, fallbackList));
 
-        List<AddionalFile> failList = new ArrayList<>();
+        List<AdditionalFile> failList = new ArrayList<>();
 
         fallbackList.parallelStream().forEach(file -> handleAdditionalFile(file, failList));
     }
 
-    private void handleAdditionalFile(AddionalFile file, List<AddionalFile> fallbackList) {
+    private void handleAdditionalFile(AdditionalFile file, List<AdditionalFile> fallbackList) {
         LOGGER.info("Starting to download " + file);
         try {
             FileUtils.copyURLToFile(cleanUrl(file.url), new File(configFile.install.baseInstallPath + file.destination));
@@ -52,7 +52,7 @@ public class FileManager {
     public void installLocalFiles() {
         LOGGER.info("Starting to copy local files.");
         for (LocalFile localFile : configFile.install.localFiles) {
-            LOGGER.info("Copying localfile: " + localFile);
+            LOGGER.info("Copying local file: " + localFile);
             try {
                 FileUtils.copyFile(new File(localFile.from), new File(localFile.to));
             } catch (IOException e) {

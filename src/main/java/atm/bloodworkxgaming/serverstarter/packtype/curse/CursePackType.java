@@ -380,7 +380,7 @@ public class CursePackType implements IPackType {
 
     /**
      * Downloads all mods, with a second fallback if failed
-     * This is done in parrallel for better performance
+     * This is done in parallel for better performance
      *
      * @param mods List of urls
      */

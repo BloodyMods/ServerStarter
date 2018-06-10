@@ -20,7 +20,7 @@ public class InstallConfig {
 
     public String baseInstallPath;
     public List<String> ignoreFiles;
-    public List<AddionalFile> additionalFiles;
+    public List<AdditionalFile> additionalFiles;
     public List<LocalFile> localFiles;
 
     public boolean checkFolder;

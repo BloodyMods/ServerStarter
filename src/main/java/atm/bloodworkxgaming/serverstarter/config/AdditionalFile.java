@@ -5,7 +5,7 @@ import lombok.ToString;
 
 @EqualsAndHashCode
 @ToString
-public class AddionalFile {
+public class AdditionalFile {
     public String url;
     public String destination;
 }
