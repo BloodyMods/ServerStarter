@@ -19,17 +19,15 @@ import static atm.bloodworkxgaming.serverstarter.ServerStarter.*;
 
 public class FileManager {
     public ConfigFile configFile;
-    public List<AdditionalFile> additionalFiles;
 
     public FileManager(ConfigFile configFile) {
         this.configFile = configFile;
-        additionalFiles = configFile.install.additionalFiles != null ? configFile.install.additionalFiles : Collections.emptyList();
     }
 
     public void installAdditionalFiles() {
         LOGGER.info("Starting to installing Additional Files");
         List<AdditionalFile> fallbackList = new ArrayList<>();
-        additionalFiles.parallelStream().forEach(file -> handleAdditionalFile(file, fallbackList));
+        configFile.getInstall().getAdditionalFiles().parallelStream().forEach(file -> handleAdditionalFile(file, fallbackList));
 
         List<AdditionalFile> failList = new ArrayList<>();
 
@@ -39,7 +37,7 @@ public class FileManager {
     private void handleAdditionalFile(AdditionalFile file, List<AdditionalFile> fallbackList) {
         LOGGER.info("Starting to download " + file);
         try {
-            FileUtils.copyURLToFile(cleanUrl(file.url), new File(configFile.install.baseInstallPath + file.destination));
+            FileUtils.copyURLToFile(cleanUrl(file.getUrl()), new File(configFile.getInstall().getBaseInstallPath() + file.getDestination()));
         } catch (IOException e) {
             LOGGER.error("Failed to download additional file", e);
             fallbackList.add(file);
@@ -51,10 +49,10 @@ public class FileManager {
 
     public void installLocalFiles() {
         LOGGER.info("Starting to copy local files.");
-        for (LocalFile localFile : configFile.install.localFiles) {
+        for (LocalFile localFile : configFile.getInstall().getLocalFiles()) {
             LOGGER.info("Copying local file: " + localFile);
             try {
-                FileUtils.copyFile(new File(localFile.from), new File(localFile.to));
+                FileUtils.copyFile(new File(localFile.getFrom()), new File(localFile.getTo()));
             } catch (IOException e) {
                 LOGGER.error("Error while copying local file", e);
             }

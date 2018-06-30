@@ -5,6 +5,7 @@ import atm.bloodworkxgaming.serverstarter.config.LockFile;
 import atm.bloodworkxgaming.serverstarter.logger.PrimitiveLogger;
 import atm.bloodworkxgaming.serverstarter.packtype.IPackType;
 import atm.bloodworkxgaming.serverstarter.packtype.TypeFactory;
+import atm.bloodworkxgaming.serverstarter.yaml.CustomConstructor;
 import org.apache.commons.io.FileUtils;
 import org.fusesource.jansi.AnsiConsole;
 import org.yaml.snakeyaml.DumperOptions;
@@ -26,6 +27,7 @@ public class ServerStarter {
 
     static {
         rep = new Representer();
+
         options = new DumperOptions();
         rep.addClassTag(ConfigFile.class, Tag.MAP);
         rep.addClassTag(LockFile.class, Tag.MAP);
@@ -34,7 +36,7 @@ public class ServerStarter {
 
     public static void main(String[] args) {
         try {
-            ConfigFile config = readConfig().normalize();
+            ConfigFile config = readConfig();
             lockFile = readLockFile();
             AnsiConsole.systemInstall();
 
@@ -58,13 +60,13 @@ public class ServerStarter {
             LOGGER.info(ansi().a("   Github:    ").fgBrightBlue().a("https://github.com/AllTheMods/ServerStarter"));
             LOGGER.info(ansi().a("   Discord:   ").fgBrightBlue().a("http://discord.allthepacks.com"));
             LOGGER.info("");
-            LOGGER.info(ansi().a("You are playing ").fgGreen().a(config.modpack.name));
+            LOGGER.info(ansi().a("You are playing ").fgGreen().a(config.getModpack().getName()));
             LOGGER.info("Starting to install/launch the server, lean back!");
             LOGGER.info(ansi().fgRed().a("::::::::::::::::::::::::::::::::::::::::::::::::::::"));
             LOGGER.info("");
 
 
-            if (!InternetChecker.checkConnection() && config.launch.checkOffline) {
+            if (!InternetChecker.checkConnection() && config.getLaunch().getCheckOffline()) {
                 LOGGER.error("Problems with the Internet connection, shutting down.");
                 return;
             }
@@ -73,26 +75,26 @@ public class ServerStarter {
 
 
             if (lockFile.checkShouldInstall(config) || installOnly) {
-                IPackType packtype = TypeFactory.createPackType(config.install.modpackFormat, config);
+                IPackType packtype = TypeFactory.createPackType(config.getInstall().getModpackFormat(), config);
                 if (packtype == null) {
                     LOGGER.error("Unknown pack format given in config");
                     return;
                 }
 
                 packtype.installPack();
-                lockFile.packInstalled = true;
-                lockFile.packUrl = config.install.modpackUrl;
+                lockFile.setPackInstalled(true);
+                lockFile.setPackUrl(config.getInstall().getModpackUrl());
                 saveLockFile(lockFile);
 
 
-                if (config.install.installForge) {
+                if (config.getInstall().getInstallForge()) {
                     String forgeVersion = packtype.getForgeVersion();
                     String mcVersion = packtype.getMCVersion();
-                    forgeManager.installForge(config.install.baseInstallPath, forgeVersion, mcVersion);
+                    forgeManager.installForge(config.getInstall().getBaseInstallPath(), forgeVersion, mcVersion);
                 }
 
-                if (config.launch.spongefix) {
-                    lockFile.spongeBootstrapper = forgeManager.installSpongeBootstrapper(config.install.baseInstallPath);
+                if (config.getLaunch().getSpongefix()) {
+                    lockFile.setSpongeBootstrapper(forgeManager.installSpongeBootstrapper(config.getInstall().getBaseInstallPath()));
                     saveLockFile(lockFile);
                 }
 
@@ -124,7 +126,7 @@ public class ServerStarter {
      * @return the configfile object
      */
     public static ConfigFile readConfig() {
-        Yaml yaml = new Yaml(new Constructor(ConfigFile.class), rep, options);
+        Yaml yaml = new Yaml(new CustomConstructor(ConfigFile.class), rep, options);
         try (InputStream input = new FileInputStream(new File("server-setup-config.yaml"))) {
             return yaml.load(input);
         } catch (FileNotFoundException e) {

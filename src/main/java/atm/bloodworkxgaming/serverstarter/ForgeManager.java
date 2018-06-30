@@ -26,7 +26,7 @@ public class ForgeManager {
     public void handleServer() {
         List<LocalDateTime> starttimes = new ArrayList<>();
         long _crashTimer = -1;
-        String timerString = configFile.launch.crashTimer;
+        String timerString = configFile.getLaunch().getCrashTimer();
 
         try {
             if (timerString.endsWith("h"))
@@ -51,10 +51,10 @@ public class ForgeManager {
             startServer();
             starttimes.add(now);
 
-            LOGGER.info("Server has been stopped, it has started " + starttimes.size() + " times in " + configFile.launch.crashTimer);
+            LOGGER.info("Server has been stopped, it has started " + starttimes.size() + " times in " + configFile.getLaunch().getCrashTimer());
 
 
-            shouldRestart = configFile.launch.autoRestart && starttimes.size() <= configFile.launch.crashLimit;
+            shouldRestart = configFile.getLaunch().getAutoRestart() && starttimes.size() <= configFile.getLaunch().getCrashLimit();
             if (shouldRestart) {
                 LOGGER.info("Restarting server in 10 seconds, press ctrl+c to stop");
                 try {
@@ -127,9 +127,9 @@ public class ForgeManager {
 
             LOGGER.info("Done installing forge, deleting installer!");
 
-            lockFile.forgeInstalled = true;
-            lockFile.forgeVersion = forgeVersion;
-            lockFile.mcVersion = mcVersion;
+            lockFile.setForgeInstalled(true);
+            lockFile.setForgeVersion(forgeVersion);
+            lockFile.setMcVersion(mcVersion);
             saveLockFile(lockFile);
 
             //noinspection ResultOfMethodCallIgnored
@@ -143,11 +143,11 @@ public class ForgeManager {
     }
 
     public String installSpongeBootstrapper(String basePath) {
-        String filename = FilenameUtils.getName(configFile.install.spongeBootstrapper);
+        String filename = FilenameUtils.getName(configFile.getInstall().getSpongeBootstrapper());
         File downloadFile = new File(basePath + filename);
 
         try {
-            FileUtils.copyURLToFile(new URL(configFile.install.spongeBootstrapper), downloadFile);
+            FileUtils.copyURLToFile(new URL(configFile.getInstall().getSpongeBootstrapper()), downloadFile);
         } catch (IOException e) {
             LOGGER.error("Error while downloading bootstrapper", e);
         }
@@ -161,29 +161,29 @@ public class ForgeManager {
 
             String filename;
 
-            if (configFile.launch.spongefix) {
-                filename = lockFile.spongeBootstrapper;
+            if (configFile.getLaunch().getSpongefix()) {
+                filename = lockFile.getSpongeBootstrapper();
             } else {
-                filename = "forge-" + lockFile.mcVersion + "-" + lockFile.forgeVersion + "-universal.jar";
+                filename = "forge-" + lockFile.getMcVersion() + "-" + lockFile.getForgeVersion() + "-universal.jar";
             }
-            File launchJar = new File(configFile.install.baseInstallPath + filename);
+            File launchJar = new File(configFile.getInstall().getBaseInstallPath() + filename);
 
             List<String> arguments = new ArrayList<>();
 
-            if (configFile.launch.preJavaArgs != null && !configFile.launch.preJavaArgs.isEmpty()) {
-                String[] l = configFile.launch.preJavaArgs.trim().split(" ");
+            if (!configFile.getLaunch().getPreJavaArgs().isEmpty()) {
+                String[] l = configFile.getLaunch().getPreJavaArgs().trim().split(" ");
                 arguments.addAll(Arrays.asList(l));
             }
 
             arguments.add("java");
-            arguments.addAll(configFile.launch.javaArgs);
-            arguments.add("-Xmx" + configFile.launch.maxRam);
+            arguments.addAll(configFile.getLaunch().getJavaArgs());
+            arguments.add("-Xmx" + configFile.getLaunch().getMaxRam());
 
-            if (configFile.launch.javaArgs.stream().noneMatch(s -> s.trim().startsWith("-Xms"))) {
+            if (configFile.getLaunch().getJavaArgs().stream().noneMatch(s -> s.trim().startsWith("-Xms"))) {
                 try {
-                    int xmx = Integer.parseInt(configFile.launch.maxRam.substring(0, configFile.launch.maxRam.length() - 1));
+                    int xmx = Integer.parseInt(configFile.getLaunch().getMaxRam().substring(0, configFile.getLaunch().getMaxRam().length() - 1));
                     int xms = Math.max(1, xmx / 2);
-                    arguments.add("-Xms" + xms + configFile.launch.maxRam.substring(configFile.launch.maxRam.length() - 1));
+                    arguments.add("-Xms" + xms + configFile.getLaunch().getMaxRam().substring(configFile.getLaunch().getMaxRam().length() - 1));
 
                 } catch (NumberFormatException e) {
                     LOGGER.error("Problem while calculating XMS", e);
@@ -199,7 +199,7 @@ public class ForgeManager {
             LOGGER.info("For output of this check the server log", true);
             Process process = new ProcessBuilder(arguments)
                     .inheritIO()
-                    .directory(new File(configFile.install.baseInstallPath + "."))
+                    .directory(new File(configFile.getInstall().getBaseInstallPath() + "."))
                     .start();
 
 

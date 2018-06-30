@@ -1,22 +1,22 @@
-package atm.bloodworkxgaming.serverstarter.packtype;
+package atm.bloodworkxgaming.serverstarter.packtype
 
-public interface IPackType {
+interface IPackType {
     /**
      * Downloads and installs the pack
      */
-    void installPack();
+    fun installPack()
 
     /**
      * Gets the forge version, can be based on the version from the downloaded pack
      *
      * @return String representation of the version
      */
-    String getForgeVersion();
+    fun getForgeVersion(): String
 
     /**
      * Gets the forge version, can be based on the version from the downloaded pack
      *
      * @return String representation of the version
      */
-    String getMCVersion();
+    fun getMCVersion(): String
 }
