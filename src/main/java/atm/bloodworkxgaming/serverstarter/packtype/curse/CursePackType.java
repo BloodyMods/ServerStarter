@@ -7,16 +7,15 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.mashape.unirest.http.HttpResponse;
-import com.mashape.unirest.http.JsonNode;
-import com.mashape.unirest.http.Unirest;
-import com.mashape.unirest.http.exceptions.UnirestException;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
 
 import java.io.*;
 import java.net.URISyntaxException;
@@ -36,11 +35,13 @@ import java.util.zip.ZipInputStream;
 import static atm.bloodworkxgaming.serverstarter.ServerStarter.LOGGER;
 
 public class CursePackType implements IPackType {
+    private final OkHttpClient httpClient;
     private ConfigFile configFile;
     private String basePath;
     private String forgeVersion;
     private String mcVersion;
     private File oldFiles;
+
 
     public CursePackType(ConfigFile configFile) {
         this.configFile = configFile;
@@ -48,6 +49,8 @@ public class CursePackType implements IPackType {
         forgeVersion = configFile.install.forgeVersion;
         mcVersion = configFile.install.mcVersion;
         oldFiles = new File(basePath + "OLD_TO_DELETE/");
+
+        httpClient = new OkHttpClient();
     }
 
     @Override
@@ -80,9 +83,17 @@ public class CursePackType implements IPackType {
 
         } else if (configFile.install.formatSpecific.containsKey("packid") && configFile.install.formatSpecific.containsKey("fileid")) {
             try {
-                HttpResponse<JsonNode> res = Unirest.get("/api/v2/direct/GetAddOnFile/" + configFile.install.formatSpecific.get("packid") + "/" + configFile.install.formatSpecific.get("fileid")).asJson();
-                LOGGER.info("PackID request response: " + res);
-            } catch (UnirestException e) {
+                Request request = new Request.Builder()
+                        .url("/api/v2/direct/GetAddOnFile/" + configFile.install.formatSpecific.get("packid") + "/" + configFile.install.formatSpecific.get("fileid"))
+                        .build();
+                Response response = httpClient.newCall(request).execute();
+                ResponseBody body = response.body();
+                if (body != null) {
+                    LOGGER.info("PackID request response: " + body.string());
+                } else {
+                    LOGGER.info("PackID request response returned with a null body");
+                }
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }
@@ -284,23 +295,26 @@ public class CursePackType implements IPackType {
             LOGGER.info("Download url is: " + url, true);
 
             try {
-                HttpResponse<JsonNode> res = Unirest
-                        .get(url)
+                Request request = new Request.Builder()
+                        .url(url)
                         .header("User-Agent", "All the mods server installer.")
                         .header("Content-Type", "application/json")
-                        .asJson();
+                        .build();
+                Response res = httpClient.newCall(request).execute();
 
-                if (res.getStatus() != 200)
-                    throw new UnirestException("Response was not OK");
+                if (!res.isSuccessful())
+                    throw new IOException("Request to " + url + " was not successful.");
+                ResponseBody body = res.body();
+                if (body == null)
+                    throw new IOException("Request to " + url + " returned a null body.");
 
-                JsonObject jsonRes = new JsonParser().parse(res.getBody().toString()).getAsJsonObject();
+                JsonObject jsonRes = new JsonParser().parse(body.string()).getAsJsonObject();
                 LOGGER.info("Response from manifest query: " + jsonRes, true);
 
                 urls.add(jsonRes
                         .getAsJsonObject()
                         .getAsJsonPrimitive("DownloadURL").getAsString());
-
-            } catch (UnirestException e) {
+            } catch (IOException e) {
                 LOGGER.error("Error while trying to get URL from cursemeta for mod " + mod.projectID, e);
             }
         });
