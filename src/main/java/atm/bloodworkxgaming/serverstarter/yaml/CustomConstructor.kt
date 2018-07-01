@@ -11,8 +11,9 @@ class CustomConstructor(clazz: Class<*>) : Constructor(clazz) {
         val clazz = node?.type
 
         if (o == null && clazz != null) {
-            ServerStarter.LOGGER.info("Changing $node of type ${node.type} to the a default value")
+            ServerStarter.LOGGER.info("Changing $node of type ${node.type} to the a default value", true)
 
+            @Suppress("USELESS_CAST")
             return when {
                 clazz.isAssignableFrom(String::class.java) -> "" as Any? // no, this cast is indeed needed.
                 clazz.isAssignableFrom(List::class.java) -> Collections.EMPTY_LIST

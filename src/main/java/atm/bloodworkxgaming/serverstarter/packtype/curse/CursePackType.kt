@@ -1,9 +1,9 @@
 package atm.bloodworkxgaming.serverstarter.packtype.curse
 
-import atm.bloodworkxgaming.serverstarter.FileManager
-import atm.bloodworkxgaming.serverstarter.ServerStarter.LOGGER
+import atm.bloodworkxgaming.serverstarter.ServerStarter.Companion.LOGGER
 import atm.bloodworkxgaming.serverstarter.config.ConfigFile
 import atm.bloodworkxgaming.serverstarter.packtype.IPackType
+import atm.bloodworkxgaming.serverstarter.toCleanUrl
 import com.google.gson.JsonParser
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -407,7 +407,7 @@ class CursePackType(private val configFile: ConfigFile) : IPackType {
             }
 
             FileUtils.copyURLToFile(
-                    FileManager.cleanUrl(mod),
+                    mod.toCleanUrl(),
                     File(basePath + "mods/" + modName))
             LOGGER.info("[" + String.format("% 3d", counter.incrementAndGet()) + "/" + totalCount + "] Downloaded mod: " + modName)
 

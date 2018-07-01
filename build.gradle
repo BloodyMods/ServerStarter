@@ -19,10 +19,6 @@ dependencies {
 
     compile group: 'org.yaml', name: 'snakeyaml', version: '1.21'
 
-    // compile 'com.fasterxml.jackson.core:jackson-databind:2.9.6'
-    // compile 'com.fasterxml.jackson.module:jackson-module-kotlin:2.9.6'
-    // compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.9.6'
-
 
 
     compile group: 'commons-io', name: 'commons-io', version: '2.6'
