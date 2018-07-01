@@ -12,13 +12,17 @@ sourceCompatibility = 1.8
 
 repositories {
     mavenCentral()
+
+    maven {
+        name = 'DVS1'
+        url = 'http://dvs1.progwml6.com/files/maven'
+    }
 }
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
 
     compile group: 'org.yaml', name: 'snakeyaml', version: '1.21'
-
 
 
     compile group: 'commons-io', name: 'commons-io', version: '2.6'
@@ -30,7 +34,6 @@ dependencies {
 
     // https://mvnrepository.com/artifact/org.fusesource.jansi/jansi
     compile group: 'org.fusesource.jansi', name: 'jansi', version: '1.17.1'
-
 
     compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.16.20'
 }

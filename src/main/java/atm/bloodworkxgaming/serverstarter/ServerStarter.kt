@@ -3,7 +3,7 @@ package atm.bloodworkxgaming.serverstarter
 import atm.bloodworkxgaming.serverstarter.config.ConfigFile
 import atm.bloodworkxgaming.serverstarter.config.LockFile
 import atm.bloodworkxgaming.serverstarter.logger.PrimitiveLogger
-import atm.bloodworkxgaming.serverstarter.packtype.TypeFactory
+import atm.bloodworkxgaming.serverstarter.packtype.IPackType
 import atm.bloodworkxgaming.serverstarter.yaml.CustomConstructor
 import org.apache.commons.io.FileUtils
 import org.fusesource.jansi.Ansi.ansi
@@ -135,11 +135,8 @@ class ServerStarter(args: Array<String>) {
 
         val forgeManager = ForgeManager(config)
         if (lockFile.checkShouldInstall(config) || installOnly) {
-            val packtype = TypeFactory.createPackType(config.install.modpackFormat, config)
-            if (packtype == null) {
-                LOGGER.error("Unknown pack format given in config, shutting down.")
-                System.exit(-1)
-            }
+            val packtype = IPackType.createPackType(config.install.modpackFormat, config)
+                    ?: throw InitException("Unknown pack format given in config, shutting down.")
 
             packtype.installPack()
             lockFile.packInstalled = true
@@ -182,7 +179,11 @@ fun main(args: Array<String>) {
 
     try {
         ServerStarter(args)
+    } catch (e: InitException) {
+        ServerStarter.LOGGER.error(e.message)
     } catch (e: Throwable) {
         ServerStarter.LOGGER.error("Some uncaught error happened.", e)
     }
 }
+
+class InitException(s: String) : RuntimeException(s)
