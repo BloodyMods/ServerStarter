@@ -46,7 +46,7 @@ jar {
     manifest {
         attributes(
                 'Class-Path': configurations.compile.collect { it.getName() }.join(' '),
-                'Main-Class': 'atm.bloodworkxgaming.serverstarter.ServerStarter'
+                'Main-Class': 'atm.bloodworkxgaming.serverstarter.ServerStarterKt'
         )
     }
 }
