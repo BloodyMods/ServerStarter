@@ -55,7 +55,6 @@ class PrimitiveLogger(outputFile: File) {
         var m = currentTimeAnsi().fgRed().a("[ERROR] ").bgDefault().a(message).reset().newline().toString()
 
         if (throwable != null) {
-            throwable.printStackTrace()
             val sw = StringWriter()
             throwable.printStackTrace(PrintWriter(sw))
             m += "\n" + sw.toString()

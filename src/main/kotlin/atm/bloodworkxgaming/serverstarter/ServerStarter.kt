@@ -25,14 +25,23 @@ class ServerStarter(args: Array<String>) {
         private val options: DumperOptions = DumperOptions()
 
         val LOGGER = PrimitiveLogger(File("serverstarter.log"))
-        var lockFile: LockFile = readLockFile()
+        var lockFile: LockFile
             private set
-        val config: ConfigFile = readConfig()
+        val config: ConfigFile
 
         init {
             rep.addClassTag(ConfigFile::class.java, Tag.MAP)
             rep.addClassTag(LockFile::class.java, Tag.MAP)
             options.defaultFlowStyle = DumperOptions.FlowStyle.FLOW
+
+            try {
+                lockFile = readLockFile()
+                config = readConfig()
+            } catch (e: Exception) {
+                LOGGER.error("Failed to load Yaml", e)
+                throw InitException("Failed to load class", e)
+            }
+
         }
 
         /**
@@ -103,10 +112,9 @@ class ServerStarter(args: Array<String>) {
         }
     }
 
+    private val installOnly: Boolean = args.getOrNull(0) == "install"
 
-    init {
-        val installOnly = args.getOrNull(0) == "install"
-
+    fun greet() {
         LOGGER.run {
             info("ConfigFile: $config", true)
             info("LockFile: $lockFile", true)
@@ -126,6 +134,9 @@ class ServerStarter(args: Array<String>) {
             info(ansi().fgRed().a("::::::::::::::::::::::::::::::::::::::::::::::::::::"))
             info("")
         }
+    }
+
+    fun startLoading() {
 
         if (!InternetChecker.checkConnection() && config.launch.checkOffline) {
             LOGGER.error("Problems with the Internet connection, shutting down.")
@@ -178,7 +189,11 @@ fun main(args: Array<String>) {
     AnsiConsole.systemInstall()
 
     try {
-        ServerStarter(args)
+        val starter = ServerStarter(args)
+
+        starter.greet()
+        starter.startLoading()
+
     } catch (e: InitException) {
         ServerStarter.LOGGER.error(e.message)
     } catch (e: Throwable) {
@@ -186,4 +201,4 @@ fun main(args: Array<String>) {
     }
 }
 
-class InitException(s: String) : RuntimeException(s)
+class InitException(s: String, e: Exception? = null) : RuntimeException(s, e)
