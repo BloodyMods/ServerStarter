@@ -4,7 +4,7 @@ import org.junit.Test
 
 class TestOKHttp {
     @Test
-    fun test(): Unit {
+    fun test() {
         val client = OkHttpClient.Builder()
                 .followRedirects(false)
                 .followSslRedirects(false)

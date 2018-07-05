@@ -36,7 +36,7 @@ class CursePackType(private val configFile: ConfigFile) : IPackType {
     override fun installPack() {
         if (!configFile.install.modpackUrl.isEmpty()) {
             var url = configFile.install.modpackUrl
-            if (!url.endsWith("/download"))
+            if (url.contains("curseforge.com") && !url.endsWith("/download"))
                 url += "/download"
 
             try {
