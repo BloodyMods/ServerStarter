@@ -91,9 +91,14 @@ githubRelease {
 tasks.githubRelease.dependsOn zipDist
 
 static String getGithubKey(){
-    Properties props = new Properties()
-    props.load(new FileInputStream(new File('secrets.properties')))
-    return props['GITHUB_TOKEN']
+    if (new File('secrets.properties').exists()) {
+
+        Properties props = new Properties()
+        props.load(new FileInputStream(new File('secrets.properties')))
+        return props['GITHUB_TOKEN']
+    }
+
+    return ""
 }
 
 task depsize {
