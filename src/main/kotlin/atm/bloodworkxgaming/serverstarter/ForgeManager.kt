@@ -6,6 +6,7 @@ import atm.bloodworkxgaming.serverstarter.ServerStarter.Companion.lockFile
 import atm.bloodworkxgaming.serverstarter.config.ConfigFile
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.FilenameUtils
+import org.apache.commons.lang3.SystemUtils
 import org.fusesource.jansi.Ansi.ansi
 import java.io.File
 import java.io.IOException
@@ -154,6 +155,8 @@ class ForgeManager(private val configFile: ConfigFile) {
     private fun startServer() {
 
         try {
+            TODO("Get level-name from server.properties here")
+            val level_name: String = File("server.properties")
 
             val filename =
                     if (configFile.launch.spongefix) {
@@ -163,7 +166,17 @@ class ForgeManager(private val configFile: ConfigFile) {
                     }
 
             val launchJar = File(configFile.install.baseInstallPath + filename)
-            val arguments = mutableListOf<String>()
+            var arguments = mutableListOf<String>()
+
+            if (configFile.launch.ramDisk)
+                when (SystemUtils.IS_OS_LINUX) {
+                    true -> {
+                        arguments = mutableListOf("rsync", "-aAXv", "${level_name}_backup", level_name, "--delete", "&&")
+                    }
+                    false -> {
+                        LOGGER.warn("Windows does not support RAMDisk yet!")
+                    }
+                }
 
             if (!configFile.launch.preJavaArgs.isEmpty()) {
                 arguments += configFile.launch.preJavaArgs.trim().split(' ').dropWhile { it.isEmpty() }
@@ -190,6 +203,16 @@ class ForgeManager(private val configFile: ConfigFile) {
             arguments += "-jar"
             arguments += launchJar.absolutePath
             arguments += "nogui"
+
+            if (configFile.launch.ramDisk)
+                when (SystemUtils.IS_OS_LINUX) {
+                    true -> {
+                        arguments += mutableListOf("&&", "rsync", "-aAXv", level_name, "${level_name}_backup", "--delete")
+                    }
+                    false -> {
+                        LOGGER.warn("Windows does not support RAMDisk yet!")
+                    }
+                }
 
             LOGGER.info("Using arguments: $arguments", true)
             LOGGER.info("Starting Forge, output incoming")

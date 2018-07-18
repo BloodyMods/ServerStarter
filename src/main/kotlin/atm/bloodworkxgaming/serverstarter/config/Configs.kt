@@ -19,6 +19,7 @@ data class ModpackConfig(
 
 data class LaunchSettings(
         var spongefix: Boolean = false,
+        var ramDisk: Boolean = false,
         var checkOffline: Boolean = false,
         var maxRam: String = "",
 
