@@ -9,6 +9,7 @@ import org.apache.commons.io.FilenameUtils
 import org.apache.commons.lang3.SystemUtils
 import org.fusesource.jansi.Ansi.ansi
 import java.io.File
+import java.io.FileNotFoundException
 import java.io.IOException
 import java.net.URL
 import java.time.LocalDateTime
@@ -155,8 +156,13 @@ class ForgeManager(private val configFile: ConfigFile) {
     private fun startServer() {
 
         try {
-            TODO("Get level-name from server.properties here")
-            val level_name: String = File("server.properties")
+            val level_name = try {
+                val props = Properties()
+                props.load(File("server.properties").inputStream())
+                props["level-name"] as String
+            } catch (e: FileNotFoundException) {
+                "world"
+            }
 
             val filename =
                     if (configFile.launch.spongefix) {
@@ -166,12 +172,12 @@ class ForgeManager(private val configFile: ConfigFile) {
                     }
 
             val launchJar = File(configFile.install.baseInstallPath + filename)
-            var arguments = mutableListOf<String>()
+            val arguments = mutableListOf<String>()
 
             if (configFile.launch.ramDisk)
                 when (SystemUtils.IS_OS_LINUX) {
                     true -> {
-                        arguments = mutableListOf("rsync", "-aAXv", "${level_name}_backup", level_name, "--delete", "&&")
+                        arguments.addAll(arrayOf("rsync", "-aAXv", "${level_name}_backup", level_name, "--delete", "&&"))
                     }
                     false -> {
                         LOGGER.warn("Windows does not support RAMDisk yet!")
@@ -179,19 +185,21 @@ class ForgeManager(private val configFile: ConfigFile) {
                 }
 
             if (!configFile.launch.preJavaArgs.isEmpty()) {
-                arguments += configFile.launch.preJavaArgs.trim().split(' ').dropWhile { it.isEmpty() }
+                arguments.addAll(configFile.launch.preJavaArgs.trim().split(' ').dropWhile { it.isEmpty() })
             }
 
-            arguments += "java"
-            arguments += configFile.launch.javaArgs
-            arguments += "-Xmx${configFile.launch.maxRam}"
+
+
+            arguments.add("java")
+            arguments.addAll(configFile.launch.javaArgs)
+            arguments.add("-Xmx${configFile.launch.maxRam}")
 
             if (configFile.launch.javaArgs.none { it.trim().startsWith("-Xms") }) {
                 try {
                     val xmx = Integer.parseInt(configFile.launch.maxRam.substring(0, configFile.launch.maxRam.length - 1))
                     val xms = Math.max(1, xmx / 2)
                     val ending = configFile.launch.maxRam.substring(configFile.launch.maxRam.length - 1)
-                    arguments += "-Xms$xms$ending"
+                    arguments.add("-Xms$xms$ending")
 
                 } catch (e: NumberFormatException) {
                     LOGGER.error("Problem while calculating XMS", e)
@@ -200,14 +208,12 @@ class ForgeManager(private val configFile: ConfigFile) {
             }
 
 
-            arguments += "-jar"
-            arguments += launchJar.absolutePath
-            arguments += "nogui"
+            arguments.addAll(arrayOf("-jar", launchJar.absolutePath, "nogui"))
 
             if (configFile.launch.ramDisk)
                 when (SystemUtils.IS_OS_LINUX) {
                     true -> {
-                        arguments += mutableListOf("&&", "rsync", "-aAXv", level_name, "${level_name}_backup", "--delete")
+                        arguments.addAll(arrayOf("&&", "rsync", "-aAXv", level_name, "${level_name}_backup", "--delete"))
                     }
                     false -> {
                         LOGGER.warn("Windows does not support RAMDisk yet!")
