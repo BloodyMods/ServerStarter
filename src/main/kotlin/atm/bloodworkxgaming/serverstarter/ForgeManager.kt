@@ -173,11 +173,13 @@ class ForgeManager(private val configFile: ConfigFile) {
 
             val launchJar = File(configFile.install.baseInstallPath + filename)
             val arguments = mutableListOf<String>()
+            val ram_pre_arguments = mutableListOf<String>()
+            val ram_post_arguments = mutableListOf<String>()
 
             if (configFile.launch.ramDisk)
                 when (SystemUtils.IS_OS_LINUX) {
                     true -> {
-                        arguments.addAll(arrayOf("rsync", "-aAXv", "${level_name}_backup", level_name, "--delete", "&&"))
+                        ram_pre_arguments.addAll(arrayOf("rsync", "-aAXv", "${level_name}_backup", level_name, "--delete"))
                     }
                     false -> {
                         LOGGER.warn("Windows does not support RAMDisk yet!")
@@ -213,7 +215,7 @@ class ForgeManager(private val configFile: ConfigFile) {
             if (configFile.launch.ramDisk)
                 when (SystemUtils.IS_OS_LINUX) {
                     true -> {
-                        arguments.addAll(arrayOf("&&", "rsync", "-aAXv", level_name, "${level_name}_backup", "--delete"))
+                        ram_post_arguments.addAll(arrayOf("rsync", "-aAXv", level_name, "${level_name}_backup", "--delete"))
                     }
                     false -> {
                         LOGGER.warn("Windows does not support RAMDisk yet!")
@@ -223,17 +225,43 @@ class ForgeManager(private val configFile: ConfigFile) {
             LOGGER.info("Using arguments: $arguments", true)
             LOGGER.info("Starting Forge, output incoming")
             LOGGER.info("For output of this check the server log", true)
-            val process = ProcessBuilder(arguments)
-                    .inheritIO()
-                    .directory(File(configFile.install.baseInstallPath + "."))
-                    .start()
+            if (configFile.launch.ramDisk)
+                ProcessBuilder(ram_pre_arguments).apply {
+                    inheritIO()
+                    directory(File(configFile.install.baseInstallPath + "."))
+                    start().apply {
+                        waitFor()
+                        outputStream.close()
+                        errorStream.close()
+                        inputStream.close()
+                    }
 
+                }
 
-            process.waitFor()
+            val process = ProcessBuilder(arguments).apply {
+                inheritIO()
+                directory(File(configFile.install.baseInstallPath + "."))
+                start().apply {
+                    waitFor()
+                    outputStream.close()
+                    errorStream.close()
+                    inputStream.close()
+                }
 
-            process.outputStream.close()
-            process.errorStream.close()
-            process.inputStream.close()
+            }
+
+            if (configFile.launch.ramDisk)
+                ProcessBuilder(ram_post_arguments).apply {
+                    inheritIO()
+                    directory(File(configFile.install.baseInstallPath + "."))
+                    start().apply {
+                        waitFor()
+                        outputStream.close()
+                        errorStream.close()
+                        inputStream.close()
+                    }
+
+                }
 
         } catch (e: IOException ) {
             LOGGER.error("Error while starting the server", e)
