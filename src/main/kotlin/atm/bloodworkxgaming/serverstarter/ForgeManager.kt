@@ -179,7 +179,7 @@ class ForgeManager(private val configFile: ConfigFile) {
             if (configFile.launch.ramDisk)
                 when (SystemUtils.IS_OS_LINUX) {
                     true -> {
-                        ram_pre_arguments.addAll(arrayOf("rsync", "-aAXv", "${level_name}_backup", level_name, "--delete"))
+                        ram_pre_arguments.addAll(arrayOf("rsync", "-aAXv", "${level_name}_backup/", level_name, "--delete"))
                     }
                     false -> {
                         LOGGER.warn("Windows does not support RAMDisk yet!")
@@ -215,7 +215,7 @@ class ForgeManager(private val configFile: ConfigFile) {
             if (configFile.launch.ramDisk)
                 when (SystemUtils.IS_OS_LINUX) {
                     true -> {
-                        ram_post_arguments.addAll(arrayOf("rsync", "-aAXv", level_name, "${level_name}_backup", "--delete"))
+                        ram_post_arguments.addAll(arrayOf("rsync", "-aAXv", "${level_name}/", "${level_name}_backup", "--delete"))
                     }
                     false -> {
                         LOGGER.warn("Windows does not support RAMDisk yet!")
