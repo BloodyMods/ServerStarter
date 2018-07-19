@@ -89,7 +89,7 @@ task zipDist (type: Zip) {
     destinationDir = file("$buildDir/release/")
 }
 
-/
+
 githubRelease {
     token = getGithubKey()
     owner = "AllTheMods"

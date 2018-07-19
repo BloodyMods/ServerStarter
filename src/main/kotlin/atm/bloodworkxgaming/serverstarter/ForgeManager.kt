@@ -238,7 +238,7 @@ class ForgeManager(private val configFile: ConfigFile) {
 
                 }
 
-            val process = ProcessBuilder(arguments).apply {
+            ProcessBuilder(arguments).apply {
                 inheritIO()
                 directory(File(configFile.install.baseInstallPath + "."))
                 start().apply {
