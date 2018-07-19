@@ -4,7 +4,7 @@ if [[ $(cat server-setup-config.yaml | grep 'ramDisk:' | awk 'BEGIN {FS=":"}{pri
     SAVE_DIR=$(cat server.properties | grep 'level-name' | awk 'BEGIN {FS="="}{print $2}')
     mv $SAVE_DIR "${SAVE_DIR}_backup"
     mkdir $SAVE_DIR
-    sudo mount -t ramfs -o size=2G ramfs $SAVE_DIR
+    sudo mount -t tmpfs -o size=2G tmpfs $SAVE_DIR
     DO_RAMDISK=1
 fi
 java -d64 -jar serverstarter-@@serverstarter-libVersion@@.jar
