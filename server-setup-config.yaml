@@ -24,7 +24,7 @@ install:
   forgeInstallerUrl: ~
 
   # Link to where the file where the modpack can be distributed
-  modpackUrl: https://minecraft.curseforge.com/projects/all-the-mods-3/files/2556240
+  modpackUrl: https://minecraft.curseforge.com/projects/all-the-mods-3/files/2581310
 
   # This is used to specify in which format the modpack is distributed, the server launcher has to handle each individually if their format differs
   modpackFormat: curseforge

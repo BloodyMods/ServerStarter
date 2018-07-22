@@ -5,6 +5,7 @@ import atm.bloodworkxgaming.serverstarter.config.LockFile
 import atm.bloodworkxgaming.serverstarter.logger.PrimitiveLogger
 import atm.bloodworkxgaming.serverstarter.packtype.IPackType
 import atm.bloodworkxgaming.serverstarter.yaml.CustomConstructor
+import okhttp3.OkHttpClient
 import org.apache.commons.io.FileUtils
 import org.fusesource.jansi.Ansi.ansi
 import org.fusesource.jansi.AnsiConsole
@@ -138,7 +139,7 @@ class ServerStarter(args: Array<String>) {
 
     fun startLoading() {
 
-        if (!InternetChecker.checkConnection() && config.launch.checkOffline) {
+        if (!InternetManager.checkConnection() && config.launch.checkOffline) {
             LOGGER.error("Problems with the Internet connection, shutting down.")
             System.exit(-1)
         }

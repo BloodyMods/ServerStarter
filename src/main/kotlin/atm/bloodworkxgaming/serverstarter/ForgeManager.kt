@@ -107,7 +107,7 @@ class ForgeManager(private val configFile: ConfigFile) {
 
         try {
             LOGGER.info("Attempting to download forge installer from $url")
-            FileUtils.copyURLToFile(URL(url), installerPath)
+            InternetManager.downloadToFile(url, installerPath)
 
             LOGGER.info("Starting installation of Forge, installer output incoming")
             LOGGER.info("Check log for installer for more information", true)
@@ -143,7 +143,7 @@ class ForgeManager(private val configFile: ConfigFile) {
         val downloadFile = File(basePath + filename)
 
         try {
-            FileUtils.copyURLToFile(URL(configFile.install.spongeBootstrapper), downloadFile)
+            InternetManager.downloadToFile(configFile.install.spongeBootstrapper, downloadFile)
         } catch (e: IOException) {
             LOGGER.error("Error while downloading bootstrapper", e)
         }

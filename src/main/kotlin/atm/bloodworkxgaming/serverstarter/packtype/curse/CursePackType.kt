@@ -1,11 +1,10 @@
 package atm.bloodworkxgaming.serverstarter.packtype.curse
 
+import atm.bloodworkxgaming.serverstarter.InternetManager
 import atm.bloodworkxgaming.serverstarter.ServerStarter.Companion.LOGGER
 import atm.bloodworkxgaming.serverstarter.config.ConfigFile
 import atm.bloodworkxgaming.serverstarter.packtype.IPackType
-import atm.bloodworkxgaming.serverstarter.toCleanUrl
 import com.google.gson.JsonParser
-import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.FilenameUtils
@@ -14,7 +13,6 @@ import java.io.FileInputStream
 import java.io.IOException
 import java.io.InputStreamReader
 import java.net.URISyntaxException
-import java.net.URL
 import java.nio.file.FileSystems
 import java.nio.file.PathMatcher
 import java.nio.file.Paths
@@ -26,7 +24,7 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 
 class CursePackType(private val configFile: ConfigFile) : IPackType {
-    private val httpClient = OkHttpClient()
+
     private val basePath = configFile.install.baseInstallPath
     private var forgeVersion: String = configFile.install.forgeVersion
     private var mcVersion: String = configFile.install.mcVersion
@@ -65,7 +63,7 @@ class CursePackType(private val configFile: ConfigFile) : IPackType {
                         .url("/api/v2/direct/GetAddOnFile/" + configFile.install.formatSpecific["packid"] + "/" + configFile.install.formatSpecific["fileid"])
                         .build()
 
-                val response = httpClient.newCall(request).execute()
+                val response = InternetManager.httpClient.newCall(request).execute()
                 val body = response.body()
                 if (body != null) {
                     LOGGER.info("PackID request response: " + body.string())
@@ -111,7 +109,7 @@ class CursePackType(private val configFile: ConfigFile) : IPackType {
         try {
             val to = File(basePath + "modpack-download.zip")
 
-            FileUtils.copyURLToFile(URL(url), to)
+            InternetManager.downloadToFile(url, to)
             LOGGER.info("Downloaded the modpack zip file to " + to.absolutePath)
 
             return to
@@ -265,7 +263,8 @@ class CursePackType(private val configFile: ConfigFile) : IPackType {
                         .header("User-Agent", "All the mods server installer.")
                         .header("Content-Type", "application/json")
                         .build()
-                val res = httpClient.newCall(request).execute()
+                println("url = ${url}")
+                val res = InternetManager.httpClient.newCall(request).execute()
 
                 if (!res.isSuccessful)
                     throw IOException("Request to $url was not successful.")
@@ -278,7 +277,7 @@ class CursePackType(private val configFile: ConfigFile) : IPackType {
                         .asJsonObject
                         .getAsJsonPrimitive("DownloadURL").asString)
             } catch (e: IOException) {
-                LOGGER.error("Error while trying to get URL from cursemeta for mod " + mod.projectID, e)
+                LOGGER.error("Error while trying to get URL from cursemeta for mod $mod", e)
             }
         }
 
@@ -406,9 +405,7 @@ class CursePackType(private val configFile: ConfigFile) : IPackType {
                 }
             }
 
-            FileUtils.copyURLToFile(
-                    mod.toCleanUrl(),
-                    File(basePath + "mods/" + modName))
+            InternetManager.downloadToFile(mod, File(basePath + "mods/" + modName))
             LOGGER.info("[" + String.format("% 3d", counter.incrementAndGet()) + "/" + totalCount + "] Downloaded mod: " + modName)
 
         } catch (e: IOException) {

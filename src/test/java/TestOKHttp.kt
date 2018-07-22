@@ -1,6 +1,8 @@
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okio.Okio
 import org.junit.Test
+import java.io.File
 
 class TestOKHttp {
     @Test
@@ -16,6 +18,29 @@ class TestOKHttp {
                 .build()
 
         val res = client.newCall(req).execute()
+
+        println(res.header("Location"))
+        println(res.isRedirect)
+    }
+
+    @Test
+    fun testDownload() {
+        val client = OkHttpClient.Builder()
+                .build()
+
+        val req = Request.Builder()
+                .url("https://edge.forgecdn.net/files/2560/919/Pam's HarvestCraft 1.12.2u.jar")
+                .get()
+                .build()
+
+        val res = client.newCall(req).execute()
+        val file = File("D:\\Users\\jonas\\Documents\\GitHub\\serverstarter\\test/Pam's HarvestCraft 1.12.2u.jar")
+        println("file = ${file.absolutePath}")
+        val sink = Okio.buffer(Okio.sink(file))
+
+        val source = res.body()?.source()
+        sink.writeAll(source)
+        sink.close()
 
         println(res.header("Location"))
         println(res.isRedirect)

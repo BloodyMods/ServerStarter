@@ -25,7 +25,7 @@ class FileManager(private val configFile: ConfigFile) {
     private fun handleAdditionalFile(file: AdditionalFile, fallbackList: MutableList<AdditionalFile>) {
         LOGGER.info("Starting to download $file")
         try {
-            FileUtils.copyURLToFile(file.url.toCleanUrl(), File(configFile.install.baseInstallPath + file.destination))
+            InternetManager.downloadToFile(file.url, File(configFile.install.baseInstallPath + file.destination))
         } catch (e: IOException) {
             LOGGER.error("Failed to download additional file", e)
             fallbackList.add(file)
@@ -60,3 +60,4 @@ fun String.toCleanUrl(): URL {
 
     return URI(sOrNot, host, path, null).toURL()
 }
+
