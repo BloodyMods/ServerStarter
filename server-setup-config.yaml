@@ -24,7 +24,7 @@ install:
   forgeInstallerUrl: ~
 
   # Link to where the file where the modpack can be distributed
-  modpackUrl: https://minecraft.curseforge.com/projects/all-the-mods-3/files/2556240
+  modpackUrl: https://minecraft.curseforge.com/projects/all-the-mods-3/files/2581310
 
   # This is used to specify in which format the modpack is distributed, the server launcher has to handle each individually if their format differs
   modpackFormat: curseforge
@@ -77,6 +77,11 @@ install:
 launch:
   # applies the launch wrapper to fix sponge for a few mods
   spongefix: no
+
+  # Use a RAMDisk for the world folder
+  # case-sensitive; use only lowercase `yes` or `no`
+  # NOTE: The server must have run once fully before switching to `yes`!
+  ramDisk: no
 
   # checks with the help of a few unrelated server whether the server is online
   checkOffline: yes
