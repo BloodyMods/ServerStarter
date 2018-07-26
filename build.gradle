@@ -34,7 +34,6 @@ dependencies {
 
     // https://mvnrepository.com/artifact/org.fusesource.jansi/jansi
     compile group: 'org.fusesource.jansi', name: 'jansi', version: '1.17.1'
-    compile 'org.apache.commons:commons-lang3:3.7'
 
     compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.16.20'
 }

@@ -6,12 +6,10 @@ import atm.bloodworkxgaming.serverstarter.ServerStarter.Companion.lockFile
 import atm.bloodworkxgaming.serverstarter.config.ConfigFile
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.FilenameUtils
-import org.apache.commons.lang3.SystemUtils
 import org.fusesource.jansi.Ansi.ansi
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
-import java.net.URL
 import java.time.LocalDateTime
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
@@ -156,9 +154,12 @@ class ForgeManager(private val configFile: ConfigFile) {
     private fun startServer() {
 
         try {
-            val level_name = try {
+            val levelName = try {
                 val props = Properties()
-                props.load(File("server.properties").inputStream())
+                File("server.properties").inputStream().use {
+                    props.load(it)
+                }
+
                 props["level-name"] as String
             } catch (e: FileNotFoundException) {
                 "world"
@@ -173,24 +174,19 @@ class ForgeManager(private val configFile: ConfigFile) {
 
             val launchJar = File(configFile.install.baseInstallPath + filename)
             val arguments = mutableListOf<String>()
-            val ram_pre_arguments = mutableListOf<String>()
-            val ram_post_arguments = mutableListOf<String>()
+            val ramPreArguments = mutableListOf<String>()
+            val ramPostArguments = mutableListOf<String>()
 
             if (configFile.launch.ramDisk)
-                when (SystemUtils.IS_OS_LINUX) {
-                    true -> {
-                        ram_pre_arguments.addAll(arrayOf("rsync", "-aAXv", "${level_name}_backup/", level_name))
-                    }
-                    false -> {
-                        LOGGER.warn("Windows does not support RAMDisk yet!")
-                    }
+                if (OSUtil.isLinux) {
+                    ramPreArguments.addAll(arrayOf("rsync", "-aAXv", "${levelName}_backup/", levelName))
+                } else {
+                    LOGGER.warn("Windows does not support RAMDisk yet!")
                 }
 
             if (!configFile.launch.preJavaArgs.isEmpty()) {
                 arguments.addAll(configFile.launch.preJavaArgs.trim().split(' ').dropWhile { it.isEmpty() })
             }
-
-
 
             arguments.add("java")
             arguments.addAll(configFile.launch.javaArgs)
@@ -213,9 +209,9 @@ class ForgeManager(private val configFile: ConfigFile) {
             arguments.addAll(arrayOf("-jar", launchJar.absolutePath, "nogui"))
 
             if (configFile.launch.ramDisk)
-                when (SystemUtils.IS_OS_LINUX) {
+                when (OSUtil.isLinux) {
                     true -> {
-                        ram_post_arguments.addAll(arrayOf("rsync", "-aAXv", "${level_name}/", "${level_name}_backup"))
+                        ramPostArguments.addAll(arrayOf("rsync", "-aAXv", "$levelName/", "${levelName}_backup"))
                     }
                     false -> {
                         LOGGER.warn("Windows does not support RAMDisk yet!")
@@ -226,7 +222,7 @@ class ForgeManager(private val configFile: ConfigFile) {
             LOGGER.info("Starting Forge, output incoming")
             LOGGER.info("For output of this check the server log", true)
             if (configFile.launch.ramDisk)
-                ProcessBuilder(ram_pre_arguments).apply {
+                ProcessBuilder(ramPreArguments).apply {
                     inheritIO()
                     directory(File(configFile.install.baseInstallPath + "."))
                     start().apply {
@@ -251,7 +247,7 @@ class ForgeManager(private val configFile: ConfigFile) {
             }
 
             if (configFile.launch.ramDisk)
-                ProcessBuilder(ram_post_arguments).apply {
+                ProcessBuilder(ramPostArguments).apply {
                     inheritIO()
                     directory(File(configFile.install.baseInstallPath + "."))
                     start().apply {
@@ -263,7 +259,7 @@ class ForgeManager(private val configFile: ConfigFile) {
 
                 }
 
-        } catch (e: IOException ) {
+        } catch (e: IOException) {
             LOGGER.error("Error while starting the server", e)
         } catch (e: InterruptedException) {
             LOGGER.error("Error while starting the server", e)

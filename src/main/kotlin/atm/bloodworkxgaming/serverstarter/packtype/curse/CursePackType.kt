@@ -263,7 +263,7 @@ class CursePackType(private val configFile: ConfigFile) : IPackType {
                         .header("User-Agent", "All the mods server installer.")
                         .header("Content-Type", "application/json")
                         .build()
-                println("url = ${url}")
+
                 val res = InternetManager.httpClient.newCall(request).execute()
 
                 if (!res.isSuccessful)
