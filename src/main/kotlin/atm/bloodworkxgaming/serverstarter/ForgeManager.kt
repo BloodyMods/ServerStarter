@@ -6,8 +6,10 @@ import atm.bloodworkxgaming.serverstarter.ServerStarter.Companion.lockFile
 import atm.bloodworkxgaming.serverstarter.config.ConfigFile
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.FilenameUtils
+import org.apache.commons.lang3.SystemUtils
 import org.fusesource.jansi.Ansi.ansi
 import java.io.File
+import java.io.FileNotFoundException
 import java.io.IOException
 import java.net.URL
 import java.time.LocalDateTime
@@ -154,6 +156,13 @@ class ForgeManager(private val configFile: ConfigFile) {
     private fun startServer() {
 
         try {
+            val level_name = try {
+                val props = Properties()
+                props.load(File("server.properties").inputStream())
+                props["level-name"] as String
+            } catch (e: FileNotFoundException) {
+                "world"
+            }
 
             val filename =
                     if (configFile.launch.spongefix) {
@@ -164,21 +173,35 @@ class ForgeManager(private val configFile: ConfigFile) {
 
             val launchJar = File(configFile.install.baseInstallPath + filename)
             val arguments = mutableListOf<String>()
+            val ram_pre_arguments = mutableListOf<String>()
+            val ram_post_arguments = mutableListOf<String>()
+
+            if (configFile.launch.ramDisk)
+                when (SystemUtils.IS_OS_LINUX) {
+                    true -> {
+                        ram_pre_arguments.addAll(arrayOf("rsync", "-aAXv", "${level_name}_backup/", level_name))
+                    }
+                    false -> {
+                        LOGGER.warn("Windows does not support RAMDisk yet!")
+                    }
+                }
 
             if (!configFile.launch.preJavaArgs.isEmpty()) {
-                arguments += configFile.launch.preJavaArgs.trim().split(' ').dropWhile { it.isEmpty() }
+                arguments.addAll(configFile.launch.preJavaArgs.trim().split(' ').dropWhile { it.isEmpty() })
             }
 
-            arguments += "java"
-            arguments += configFile.launch.javaArgs
-            arguments += "-Xmx${configFile.launch.maxRam}"
+
+
+            arguments.add("java")
+            arguments.addAll(configFile.launch.javaArgs)
+            arguments.add("-Xmx${configFile.launch.maxRam}")
 
             if (configFile.launch.javaArgs.none { it.trim().startsWith("-Xms") }) {
                 try {
                     val xmx = Integer.parseInt(configFile.launch.maxRam.substring(0, configFile.launch.maxRam.length - 1))
                     val xms = Math.max(1, xmx / 2)
                     val ending = configFile.launch.maxRam.substring(configFile.launch.maxRam.length - 1)
-                    arguments += "-Xms$xms$ending"
+                    arguments.add("-Xms$xms$ending")
 
                 } catch (e: NumberFormatException) {
                     LOGGER.error("Problem while calculating XMS", e)
@@ -187,24 +210,58 @@ class ForgeManager(private val configFile: ConfigFile) {
             }
 
 
-            arguments += "-jar"
-            arguments += launchJar.absolutePath
-            arguments += "nogui"
+            arguments.addAll(arrayOf("-jar", launchJar.absolutePath, "nogui"))
+
+            if (configFile.launch.ramDisk)
+                when (SystemUtils.IS_OS_LINUX) {
+                    true -> {
+                        ram_post_arguments.addAll(arrayOf("rsync", "-aAXv", "${level_name}/", "${level_name}_backup"))
+                    }
+                    false -> {
+                        LOGGER.warn("Windows does not support RAMDisk yet!")
+                    }
+                }
 
             LOGGER.info("Using arguments: $arguments", true)
             LOGGER.info("Starting Forge, output incoming")
             LOGGER.info("For output of this check the server log", true)
-            val process = ProcessBuilder(arguments)
-                    .inheritIO()
-                    .directory(File(configFile.install.baseInstallPath + "."))
-                    .start()
+            if (configFile.launch.ramDisk)
+                ProcessBuilder(ram_pre_arguments).apply {
+                    inheritIO()
+                    directory(File(configFile.install.baseInstallPath + "."))
+                    start().apply {
+                        waitFor()
+                        outputStream.close()
+                        errorStream.close()
+                        inputStream.close()
+                    }
 
+                }
 
-            process.waitFor()
+            ProcessBuilder(arguments).apply {
+                inheritIO()
+                directory(File(configFile.install.baseInstallPath + "."))
+                start().apply {
+                    waitFor()
+                    outputStream.close()
+                    errorStream.close()
+                    inputStream.close()
+                }
 
-            process.outputStream.close()
-            process.errorStream.close()
-            process.inputStream.close()
+            }
+
+            if (configFile.launch.ramDisk)
+                ProcessBuilder(ram_post_arguments).apply {
+                    inheritIO()
+                    directory(File(configFile.install.baseInstallPath + "."))
+                    start().apply {
+                        waitFor()
+                        outputStream.close()
+                        errorStream.close()
+                        inputStream.close()
+                    }
+
+                }
 
         } catch (e: IOException ) {
             LOGGER.error("Error while starting the server", e)

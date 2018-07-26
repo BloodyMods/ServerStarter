@@ -78,6 +78,11 @@ launch:
   # applies the launch wrapper to fix sponge for a few mods
   spongefix: no
 
+  # Use a RAMDisk for the world folder
+  # case-sensitive; use only lowercase `yes` or `no`
+  # NOTE: The server must have run once fully before switching to `yes`!
+  ramDisk: no
+
   # checks with the help of a few unrelated server whether the server is online
   checkOffline: yes
 
