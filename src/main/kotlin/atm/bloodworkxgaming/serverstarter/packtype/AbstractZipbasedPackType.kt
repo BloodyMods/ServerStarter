@@ -15,6 +15,7 @@ abstract class AbstractZipbasedPackType(private val configFile: ConfigFile) : IP
     override fun installPack() {
         if (!configFile.install.modpackUrl.isEmpty()) {
             val url = configFile.install.modpackUrl
+            File(basePath).mkdirs()
 
             try {
                 val patterns = configFile.install.ignoreFiles
@@ -43,7 +44,7 @@ abstract class AbstractZipbasedPackType(private val configFile: ConfigFile) : IP
      * @throws IOException if something went wrong while downloading
      */
     @Throws(IOException::class)
-    protected fun obtainZipFile(url: String): File {
+    private fun obtainZipFile(url: String): File {
         return if (url.startsWith("file://")) {
             File(url.substring(7))
         } else {

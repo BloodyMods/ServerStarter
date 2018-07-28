@@ -95,7 +95,7 @@ open class CursePackType(private val configFile: ConfigFile) : AbstractZipbasedP
                                 LOGGER.info("Copying zip entry to = $outfile", true)
 
 
-                                outfile.parent?.let { File(it).mkdirs() }
+                                outfile.parentFile?.mkdirs()
 
                                 zis.writeToFile(outfile)
                             }

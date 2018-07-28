@@ -5,7 +5,7 @@ import org.junit.Test
 import java.io.File
 
 class TestOKHttp {
-    @Test
+    // @Test
     fun test() {
         val client = OkHttpClient.Builder()
                 .followRedirects(false)
@@ -23,7 +23,7 @@ class TestOKHttp {
         println(res.isRedirect)
     }
 
-    @Test
+    // @Test
     fun testDownload() {
         val client = OkHttpClient.Builder()
                 .build()
