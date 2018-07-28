@@ -24,9 +24,14 @@ install:
   forgeInstallerUrl: ~
 
   # Link to where the file where the modpack can be distributed
+  # This supports loading from local files as well for most pack types if there is file://{PathToFile} in the beginning
   modpackUrl: https://minecraft.curseforge.com/projects/all-the-mods-3/files/2581310
 
   # This is used to specify in which format the modpack is distributed, the server launcher has to handle each individually if their format differs
+  # current supported formats:
+  # - curseforge or curse
+  # - curseid
+  # - zip or zipfile
   modpackFormat: curseforge
 
   # Settings which are specific to the format used, might not be needed in some casese

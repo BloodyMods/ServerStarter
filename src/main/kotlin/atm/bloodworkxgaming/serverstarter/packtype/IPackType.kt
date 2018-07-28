@@ -1,6 +1,7 @@
 package atm.bloodworkxgaming.serverstarter.packtype
 
 import atm.bloodworkxgaming.serverstarter.config.ConfigFile
+import atm.bloodworkxgaming.serverstarter.packtype.curse.CurseIDPackType
 import atm.bloodworkxgaming.serverstarter.packtype.curse.CursePackType
 import atm.bloodworkxgaming.serverstarter.packtype.zip.ZipFilePackType
 
@@ -9,6 +10,7 @@ interface IPackType {
         private val packtype = mutableMapOf<String, (ConfigFile) -> IPackType>(
                 Pair("curse", ::CursePackType),
                 Pair("curseforge", ::CursePackType),
+                Pair("curseid", ::CurseIDPackType),
                 Pair("zip", ::ZipFilePackType),
                 Pair("zipfile", ::ZipFilePackType)
         )

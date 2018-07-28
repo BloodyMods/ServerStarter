@@ -3,7 +3,8 @@ package atm.bloodworkxgaming.serverstarter.packtype.curse
 import atm.bloodworkxgaming.serverstarter.InternetManager
 import atm.bloodworkxgaming.serverstarter.ServerStarter.Companion.LOGGER
 import atm.bloodworkxgaming.serverstarter.config.ConfigFile
-import atm.bloodworkxgaming.serverstarter.packtype.IPackType
+import atm.bloodworkxgaming.serverstarter.packtype.AbstractZipbasedPackType
+import atm.bloodworkxgaming.serverstarter.packtype.writeToFile
 import com.google.gson.JsonParser
 import okhttp3.Request
 import org.apache.commons.io.FileUtils
@@ -23,58 +24,16 @@ import java.util.regex.Pattern
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 
-class CursePackType(private val configFile: ConfigFile) : IPackType {
-
-    private val basePath = configFile.install.baseInstallPath
+open class CursePackType(private val configFile: ConfigFile) : AbstractZipbasedPackType(configFile) {
     private var forgeVersion: String = configFile.install.forgeVersion
     private var mcVersion: String = configFile.install.mcVersion
     private val oldFiles = File(basePath + "OLD_TO_DELETE/")
 
+    override fun cleanUrl(url: String): String {
+        if (url.contains("curseforge.com") && !url.endsWith("/download"))
+            return "$url/download"
 
-    override fun installPack() {
-        if (!configFile.install.modpackUrl.isEmpty()) {
-            var url = configFile.install.modpackUrl
-            if (url.contains("curseforge.com") && !url.endsWith("/download"))
-                url += "/download"
-
-            try {
-                val patterns = configFile.install.ignoreFiles
-                        .map {
-                            val s = if (it.startsWith("glob:") || it.startsWith("regex:"))
-                                it
-                            else
-                                "glob:$it"
-
-                            FileSystems.getDefault().getPathMatcher(s)
-                        }
-
-                unzipFile(downloadPack(url), patterns)
-                // unzipFile(new File(basePath + "modpack-download.zip"));
-                handleManifest()
-
-            } catch (e: IOException) {
-                e.printStackTrace()
-            }
-
-
-        } else if (configFile.install.formatSpecific.containsKey("packid") && configFile.install.formatSpecific.containsKey("fileid")) {
-            try {
-                val request = Request.Builder()
-                        .url("/api/v2/direct/GetAddOnFile/" + configFile.install.formatSpecific["packid"] + "/" + configFile.install.formatSpecific["fileid"])
-                        .build()
-
-                val response = InternetManager.httpClient.newCall(request).execute()
-                val body = response.body()
-                if (body != null) {
-                    LOGGER.info("PackID request response: " + body.string())
-                } else {
-                    LOGGER.info("PackID request response returned with a null body")
-                }
-            } catch (e: IOException) {
-                e.printStackTrace()
-            }
-
-        }
+        return url
     }
 
     /**
@@ -95,34 +54,8 @@ class CursePackType(private val configFile: ConfigFile) : IPackType {
         return mcVersion
     }
 
-    /**
-     * Downloads the modpack from the given url
-     *
-     * @param url URL to download from
-     * @return File of the saved modpack zip
-     * @throws IOException if something went wrong while downloading
-     */
     @Throws(IOException::class)
-    private fun downloadPack(url: String): File {
-        LOGGER.info("Attempting to download modpack Zip.")
-
-        try {
-            val to = File(basePath + "modpack-download.zip")
-
-            InternetManager.downloadToFile(url, to)
-            LOGGER.info("Downloaded the modpack zip file to " + to.absolutePath)
-
-            return to
-
-        } catch (e: IOException) {
-            LOGGER.error("Pack could not be downloaded")
-            throw e
-        }
-
-    }
-
-    @Throws(IOException::class)
-    private fun unzipFile(downloadedPack: File, patterns: List<PathMatcher>) {
+    override fun handleZip(file: File, pathMatchers: List<PathMatcher>) {
         // delete old installer folder
         FileUtils.deleteDirectory(oldFiles)
 
@@ -136,7 +69,7 @@ class CursePackType(private val configFile: ConfigFile) : IPackType {
         LOGGER.info("Starting to unzip files.")
         // unzip start
         try {
-            ZipInputStream(FileInputStream(downloadedPack)).use { zis ->
+            ZipInputStream(FileInputStream(file)).use { zis ->
                 var entry: ZipEntry? = zis.nextEntry
 
                 loop@ while (entry != null) {
@@ -153,7 +86,7 @@ class CursePackType(private val configFile: ConfigFile) : IPackType {
                         val path = entry.name.substring(10)
 
                         when {
-                            patterns.any { it.matches(Paths.get(path)) } ->
+                            pathMatchers.any { it.matches(Paths.get(path)) } ->
                                 LOGGER.info("Skipping $path as it is on the ignore List.", true)
 
 
@@ -191,7 +124,7 @@ class CursePackType(private val configFile: ConfigFile) : IPackType {
     }
 
     @Throws(IOException::class)
-    private fun handleManifest() {
+    override fun postProcessing() {
         val mods = ArrayList<ModEntryRaw>()
 
         InputStreamReader(FileInputStream(File(basePath + "manifest.json")), "utf-8").use { reader ->
@@ -416,18 +349,9 @@ class CursePackType(private val configFile: ConfigFile) : IPackType {
             LOGGER.error("Invalid url for $mod", e)
         }
     }
-
-
 }
 
 /**
  * Data class to keep projectID and fileID together
  */
 data class ModEntryRaw(val projectID: String, val fileID: String)
-
-fun ZipInputStream.writeToFile(file: File) {
-    file.outputStream().use { fos ->
-        val bytes = this.readBytes()
-        fos.write(bytes, 0, bytes.size)
-    }
-}
