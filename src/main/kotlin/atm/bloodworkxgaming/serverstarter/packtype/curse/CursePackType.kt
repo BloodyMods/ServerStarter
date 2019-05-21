@@ -186,7 +186,7 @@ open class CursePackType(private val configFile: ConfigFile) : AbstractZipbasedP
                 return@forEach
             }
 
-            val url = (configFile.install.getFormatSpecificSettingOrDefault("cursemeta", "https://cursemeta.dries007.net")
+            val url = (configFile.install.getFormatSpecificSettingOrDefault("cursemeta", "https://staging_cursemeta.dries007.net")
                     + "/" + mod.projectID + "/" + mod.fileID + ".json")
             LOGGER.info("Download url is: $url", true)
 
