@@ -14,18 +14,18 @@ modpack:
 # settings regarding the installation of the modpack
 install:
   # version of minecraft, needs the exact version
-  mcVersion: 1.12.2
+  mcVersion: ~
 
   # exact version of forge that is supposed to be used
   # if this value is a null value so ( ~, null, or "" ) then the version from the mod pack is going to be used
-  forgeVersion: 14.23.3.2682
+  forgeVersion: ~
 
   # If a custom installer is supposed to used, specify the url here: (Otherwise put "", ~ or null here)
   forgeInstallerUrl: ~
 
   # Link to where the file where the modpack can be distributed
   # This supports loading from local files as well for most pack types if there is file://{PathToFile} in the beginning
-  modpackUrl: https://minecraft.curseforge.com/projects/all-the-mods-3/files/2581310
+  modpackUrl: https://media.forgecdn.net/files/2751/797/All+the+Mods+3+Remix-1.4.9.zip
 
   # This is used to specify in which format the modpack is distributed, the server launcher has to handle each individually if their format differs
   # current supported formats:
@@ -39,7 +39,34 @@ install:
     # optional paramenter used for curse to specify a whole project to ignore (mostly if it is client side only)
     ignoreProject:
       - 60089
-
+      - 250398
+      - 267602
+      - 225928
+      - 226406
+      - 232131
+      - 231275
+      - 282743
+      - 265917
+      - 240630
+      - 238747
+      - 243478
+      - 291926
+      - 293496
+      - 226447
+      - 271740
+      - 237701
+      - 285492
+      - 272515
+      - 251407
+      - 253729
+      - 291727
+      - 283649
+      - 295765
+      - 285742
+      - 292992
+      - 241140
+      - 317642
+      - 231453
 
   # The base path where the server should be installed to, ~ for current path
   baseInstallPath: setup/
@@ -55,10 +82,20 @@ install:
   # This is a list of files, each ' - ' is a new file:
   # url is the directlink to the file, destination is the path to where the file should be copied to
   additionalFiles:
-    - url: https://minecraft.curseforge.com/projects/tickprofiler/files/2536494/download
-      destination: mods/TickProfiler-1.12-0.0.4.jar
-    - url: https://minecraft.curseforge.com/projects/blooddebug/files/2514858/download
+    - url: https://www.curseforge.com/minecraft/mc-mods/tickprofiler/download/2621293/file
+      destination: mods/TickProfiler-1.12-0.0.7.jar
+    - url: https://www.curseforge.com/minecraft/mc-mods/blooddebug/download/2514858/file
       destination: mods/BloodDebug-1.12.2-0.0.1-9.jar
+    - url: https://www.curseforge.com/minecraft/mc-mods/sampler/download/2692255/file
+      destination: mods/sampler-1.82.jar
+    - url: https://www.curseforge.com/minecraft/mc-mods/worldedit/download/2655056/file
+      destination: mods/worldedit-forge-mc1.12.2-6.1.10-SNAPSHOT-dist.jar
+    - url: https://www.curseforge.com/minecraft/mc-mods/world-utils/download/2482888/file
+      destination: mods/worldutils-1.12.2-0.4.2.jar
+    - url: https://ci.lucko.me/job/spark/lastSuccessfulBuild/artifact/spark-forge/build/libs/spark-forge.jar
+      destination: mods/spark-forge.jar
+    - url: https://www.curseforge.com/minecraft/mc-mods/chunkpregenerator/download/2676149/file
+      destination: mods/Chunk+Pregenerator+V1.12-2.1.jar
 
   # For often there are config which the user wants to change, here is the place to put the local path to configs, jars or whatever
   localFiles:
