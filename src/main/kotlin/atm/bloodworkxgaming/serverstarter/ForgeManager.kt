@@ -165,12 +165,15 @@ class ForgeManager(private val configFile: ConfigFile) {
                 "world"
             }
 
-            val filename =
+            var filename =
                     if (configFile.launch.spongefix) {
                         lockFile.spongeBootstrapper
                     } else {
                         "forge-${lockFile.mcVersion}-${lockFile.forgeVersion}-universal.jar"
                     }
+            if (!File(filename).exists()) {
+                filename = "forge-${lockFile.mcVersion}-${lockFile.forgeVersion}.jar"
+            }
 
             val launchJar = File(configFile.install.baseInstallPath + filename)
             val arguments = mutableListOf<String>()

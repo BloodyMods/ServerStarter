@@ -14,11 +14,11 @@ modpack:
 # settings regarding the installation of the modpack
 install:
   # version of minecraft, needs the exact version
-  mcVersion: ~
+  mcVersion: 1.13.2
 
   # exact version of forge that is supposed to be used
   # if this value is a null value so ( ~, null, or "" ) then the version from the mod pack is going to be used
-  forgeVersion: ~
+  forgeVersion: 25.0.219
 
   # If a custom installer is supposed to used, specify the url here: (Otherwise put "", ~ or null here)
   forgeInstallerUrl: ~
