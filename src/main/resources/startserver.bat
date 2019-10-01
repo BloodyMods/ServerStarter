@@ -23,7 +23,7 @@ java -d64 -version 2>&1 | %MC_SYS32%\FIND.EXE "1.8"
 ECHO.
 IF %ERRORLEVEL% EQU 0 (
 	ECHO INFO: Found 64-bit Java 1.8
-	GOTO MAIN
+	GOTO CHECK
 ) ELSE (
     GOTO JAVAERROR
 )
@@ -32,6 +32,16 @@ IF %ERRORLEVEL% EQU 0 (
 :MAIN
 java -d64 -jar serverstarter-@@serverstarter-libVersion@@.jar
 GOTO EOF
+
+:CHECK
+REM Check if serverstarter JAR is already downloaded
+IF NOT EXIST "%cd%\serverstarter-@@serverstarter-libVersion@@.jar" (
+	ECHO serverstarter binary not found, downloading serverstarter...
+	%SYSTEMROOT%\SYSTEM32\bitsadmin.exe /rawreturn /nowrap /transfer starter /download /priority foreground https://github.com/AllTheMods/ServerStarter/releases/download/v@@serverstarter-libVersion@@/serverstarter-@@serverstarter-libVersion@@.jar "%cd%\serverstarter-@@serverstarter-libVersion@@.jar"
+   GOTO MAIN
+) ELSE (
+   GOTO MAIN
+)
 
 
 :JAVAERROR
