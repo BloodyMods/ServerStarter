@@ -42,7 +42,11 @@ class FileManager(private val configFile: ConfigFile) {
         for (localFile in configFile.install.localFiles) {
             LOGGER.info("Copying local file: $localFile")
             try {
-                FileUtils.copyFile(File(localFile.from), File(localFile.to))
+                if (File(localFile.from).isDirectory) {
+                    FileUtils.copyDirectory(File(localFile.from), File(localFile.to))
+                } else {
+                    FileUtils.copyFile(File(localFile.from), File(localFile.to))
+                }
             } catch (e: IOException) {
                 LOGGER.error("Error while copying local file", e)
             }

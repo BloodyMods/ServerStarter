@@ -99,8 +99,10 @@ install:
 
   # For often there are config which the user wants to change, here is the place to put the local path to configs, jars or whatever
   localFiles:
-    - from: test/All+the+Mods+3-v5.9.5.zip
-      to: setup/test/All+the+Mods+3-v5.9.5.zip
+    - from: setup/modpack-download.zip
+      to: setup/test/modpack-download-copied.zip
+    - from: out
+      to: setup/out
 
   # This makes the program check the folder for whether it is supposed to use the
   checkFolder: yes
