@@ -6,7 +6,7 @@ plugins {
 }
 
 group = 'atm.bloodworkxgaming'
-version = '1.2.7'
+version = '1.2.8'
 
 sourceCompatibility = 1.8
 
