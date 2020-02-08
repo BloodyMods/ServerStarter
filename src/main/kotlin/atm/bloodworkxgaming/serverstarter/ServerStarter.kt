@@ -192,7 +192,7 @@ class ServerStarter(args: Array<String>) {
 }
 
 fun main(args: Array<String>) {
-    System.setProperty("jansi.passthrough", "true")
+    // System.setProperty("jansi.passthrough", "true")
     AnsiConsole.systemInstall()
 
     try {

@@ -171,7 +171,7 @@ class LoaderManager(private val configFile: ConfigFile) {
                 "world"
             }
 
-            var filename =
+            val filename =
                     if (configFile.launch.spongefix) {
                         lockFile.spongeBootstrapper
                     } else {
@@ -180,9 +180,9 @@ class LoaderManager(private val configFile: ConfigFile) {
                                 .replace("{{@mcversion@}}", lockFile.loaderVersion)
                         // "forge-${lockFile.mcVersion}-${lockFile.forgeVersion}-universal.jar"
                     }
-            if (!File(filename).exists()) {
+            /*if (!File(filename).exists()) {
                 filename = "forge-${lockFile.mcVersion}-${lockFile.loaderVersion}.jar"
-            }
+            }*/
 
             val launchJar = File(configFile.install.baseInstallPath + filename)
             val arguments = mutableListOf<String>()
