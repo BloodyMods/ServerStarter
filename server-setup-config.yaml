@@ -165,8 +165,8 @@ launch:
   startFile: "forge-{{@mcversion@}}-{{@loaderversion@}}-universal.jar"
 
   # In case you have multiple javas installed you can add a absolute path to it here
-  # otherwise 'java' is going to be used
-  forcedJavaPath: "C:/Program Files/Java/jre1.8.0_201/bin/java.exe"
+  # if the value is "", null, or ~ then 'java' from PATH is going to be used
+  forcedJavaPath: "\"C:/Program Files/Java/jre1.8.0_201/bin/java.exe\""
 
   # Java args that are supposed to be used when the server launches
   # keep in mind java args often need ' - ' in front of it to work, use clarifying parentheses to make sure it uses it correctly
