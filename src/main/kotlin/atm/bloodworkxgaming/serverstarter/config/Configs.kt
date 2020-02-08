@@ -28,7 +28,9 @@ data class LaunchSettings(
         var autoRestart: Boolean = false,
         var crashLimit: Int = 0,
         var crashTimer: String = "",
-        var preJavaArgs: String = ""
+        var preJavaArgs: String = "",
+
+        var forcedJavaPath: String = ""
 )
 
 data class InstallConfig(

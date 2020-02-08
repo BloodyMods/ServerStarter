@@ -11,7 +11,7 @@ data class ArgsConfig(
             val iter = args.iterator()
             val argsConfig = ArgsConfig()
 
-            var current = iter.next()
+            val current = iter.next()
             while (iter.hasNext()) {
                 when {
                     current == "-install" -> argsConfig.installForge = false

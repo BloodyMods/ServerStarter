@@ -116,7 +116,8 @@ class ForgeManager(private val configFile: ConfigFile) {
 
             LOGGER.info("Starting installation of Forge, installer output incoming")
             LOGGER.info("Check log for installer for more information", true)
-            val installer = ProcessBuilder("java", "-jar", installerPath.absolutePath, *configFile.install.installerArguments.toTypedArray())
+            val java = if (configFile.launch.forcedJavaPath.isEmpty()) "java" else configFile.launch.forcedJavaPath
+            val installer = ProcessBuilder(java, "-jar", installerPath.absolutePath, *configFile.install.installerArguments.toTypedArray())
                     .inheritIO()
                     .directory(File("$basePath."))
                     .start()
@@ -199,7 +200,8 @@ class ForgeManager(private val configFile: ConfigFile) {
                 arguments.addAll(configFile.launch.preJavaArgs.trim().split(' ').dropWhile { it.isEmpty() })
             }
 
-            arguments.add("java")
+            val java = if (configFile.launch.forcedJavaPath.isEmpty()) "java" else configFile.launch.forcedJavaPath
+            arguments.add(java)
             arguments.addAll(configFile.launch.javaArgs)
             arguments.add("-Xmx${configFile.launch.maxRam}")
 
