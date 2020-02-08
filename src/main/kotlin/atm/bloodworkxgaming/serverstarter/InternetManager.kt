@@ -15,7 +15,7 @@ object InternetManager {
             .readTimeout(30, TimeUnit.SECONDS)
             .build()!!
 
-    private val urls = listOf("8.8.8.8", "1.1.1.1")
+    private val urls = listOf("8.8.8.8", "1.0.0.1")
 
     fun checkConnection(): Boolean {
         var reached = 0
