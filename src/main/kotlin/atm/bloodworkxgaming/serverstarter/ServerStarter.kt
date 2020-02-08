@@ -121,7 +121,7 @@ class ServerStarter(args: Array<String>) {
 
             info(ansi().fgRed().a("::::::::::::::::::::::::::::::::::::::::::::::::::::"))
             info(ansi().fgBrightBlue().a("   Minecraft-Forge Server install/launcher jar"))
-            info(ansi().fgBrightBlue().a("   (Created by the ").fgGreen().a("\"Team RAM\"").fgBrightBlue().a(""))
+            info(ansi().fgBrightBlue().a("   (Created by the ").fgGreen().a("\"Team RAM\"")).fgBrightBlue().a(""))
             info(ansi().fgRed().a("::::::::::::::::::::::::::::::::::::::::::::::::::::"))
             info("")
             info("   This jar will launch a Minecraft Forge Modded server")
