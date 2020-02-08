@@ -10,6 +10,9 @@ data class LockFile(
 
 
     fun checkShouldInstall(configFile: ConfigFile): Boolean {
-        return (!forgeInstalled || !packInstalled || !configFile.install.forgeVersion.isEmpty() && forgeVersion != configFile.install.forgeVersion || packUrl != configFile.install.modpackUrl)
+        return (!forgeInstalled
+                || !packInstalled
+                || configFile.install.forgeVersion.isNotEmpty() && forgeVersion != configFile.install.forgeVersion
+                || packUrl != configFile.install.modpackUrl)
     }
 }

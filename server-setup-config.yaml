@@ -1,4 +1,4 @@
-# Version of the specs, only for internal usage if this format should ever change
+# Version of the specs, only for internal usage if this format should ever change drastically
 _specver: 1
 
 # modpack related settings, changes the supposed to change the visual appearance of the launcher
@@ -21,7 +21,19 @@ install:
   forgeVersion: 25.0.219
 
   # If a custom installer is supposed to used, specify the url here: (Otherwise put "", ~ or null here)
-  forgeInstallerUrl: ~
+  # supports variables: {{@loaderversion@}} and {{@mcversion@}}
+  # For forge: "http://files.minecraftforge.net/maven/net/minecraftforge/forge/{{@mcversion@}}-{{@loaderversion@}}/forge-{{@mcversion@}}-{{@loaderversion@}}-installer.jar"
+  # For Fabric: "https://maven.fabricmc.net/net/fabricmc/fabric-installer/{{@loaderversion@}}/fabric-installer-{{@loaderversion@}}.jar"
+  forgeInstallerUrl: "http://files.minecraftforge.net/maven/net/minecraftforge/forge/{{@mcversion@}}-{{@loaderversion@}}/forge-{{@mcversion@}}-{{@loaderversion@}}-installer.jar"
+
+  # Installer Arguments
+  # These Arguments have to be passed to the installer
+  # For Fabric: ["-downloadMinecraft", "server"]
+  # For Forge: ["--installServer"]
+  installerArguments:
+    - "--installServer"
+
+
 
   # Link to where the file where the modpack can be distributed
   # This supports loading from local files as well for most pack types if there is file://{PathToFile} in the beginning
@@ -98,11 +110,10 @@ install:
       destination: mods/Chunk+Pregenerator+V1.12-2.1.jar
 
   # For often there are config which the user wants to change, here is the place to put the local path to configs, jars or whatever
+  # You can copy files or folders
   localFiles:
     - from: setup/modpack-download.zip
       to: setup/test/modpack-download-copied.zip
-    - from: out
-      to: setup/out
 
   # This makes the program check the folder for whether it is supposed to use the
   checkFolder: yes
@@ -112,7 +123,7 @@ install:
 
   # Sponge bootstrapper jar URL
   # Only needed if you have spongefix enabled
-  spongeBootstrapper: https://github.com/simon816/SpongeBootstrap/releases/download/v0.6.2/SpongeBootstrap-0.6.2.jar
+  spongeBootstrapper: https://github.com/simon816/SpongeBootstrap/releases/download/v0.7.1/SpongeBootstrap-0.7.1.jar
 
 
 
@@ -147,10 +158,15 @@ launch:
   # This is only a string, not a list.
   preJavaArgs: ~
 
+  # Start File Name, variables: {{@loaderversion@}} and {{@mcversion@}}
+  # This has to be the name the installer spits out
+  # For Forge 1.13: forge-{{@mcversion@}}-{{@loaderversion@}}-universal.jar
+  # For Fabric: fabric-server-launch.jar
+  startFile: "forge-{{@mcversion@}}-{{@loaderversion@}}-universal.jar"
+
   # Java args that are supposed to be used when the server launches
   # keep in mind java args often need ' - ' in front of it to work, use clarifying parentheses to make sure it uses it correctly
   javaArgs:
-    - "-d64"
     - "-server"
     - "-XX:+AggressiveOpts"
     - "-XX:ParallelGCThreads=3"

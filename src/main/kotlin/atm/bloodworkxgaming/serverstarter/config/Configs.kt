@@ -23,6 +23,7 @@ data class LaunchSettings(
         var checkOffline: Boolean = false,
         var maxRam: String = "",
 
+        var startFile: String = "",
         var javaArgs: List<String> = Collections.emptyList(),
         var autoRestart: Boolean = false,
         var crashLimit: Int = 0,
@@ -35,6 +36,8 @@ data class InstallConfig(
 
         var forgeVersion: String = "",
         var forgeInstallerUrl: String = "",
+        var installerArguments: List<String> = Collections.emptyList(),
+
         var modpackUrl: String = "",
         var modpackFormat: String = "",
         var formatSpecific: Map<String, Any> = Collections.emptyMap(),

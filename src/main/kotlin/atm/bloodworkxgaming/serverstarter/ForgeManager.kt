@@ -15,6 +15,7 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.util.*
+import kotlin.math.max
 
 class ForgeManager(private val configFile: ConfigFile) {
 
@@ -99,10 +100,14 @@ class ForgeManager(private val configFile: ConfigFile) {
     }
 
     fun installForge(basePath: String, forgeVersion: String, mcVersion: String) {
-        val versionString = "$mcVersion-$forgeVersion"
-        val url = "http://files.minecraftforge.net/maven/net/minecraftforge/forge/$versionString/forge-$versionString-installer.jar"
+        // val versionString = "$mcVersion-$forgeVersion"
+        // val url = "http://files.minecraftforge.net/maven/net/minecraftforge/forge/$versionString/forge-$versionString-installer.jar"
+        val url = configFile.install.forgeInstallerUrl
+                .replace("{{@loaderversion@}}", forgeVersion)
+                .replace("{{@mcversion@}}", mcVersion)
         // http://files.minecraftforge.net/maven/net/minecraftforge/forge/1.12.2-14.23.3.2682/forge-1.12.2-14.23.3.2682-installer.jar
-        val installerPath = File(basePath + "forge-" + versionString + "-installer.jar")
+        //val installerPath = File(basePath + "forge-" + versionString + "-installer.jar")
+        val installerPath = File(basePath + "installer.jar")
 
 
         try {
@@ -111,7 +116,7 @@ class ForgeManager(private val configFile: ConfigFile) {
 
             LOGGER.info("Starting installation of Forge, installer output incoming")
             LOGGER.info("Check log for installer for more information", true)
-            val installer = ProcessBuilder("java", "-jar", installerPath.absolutePath, "--installServer")
+            val installer = ProcessBuilder("java", "-jar", installerPath.absolutePath, *configFile.install.installerArguments.toTypedArray())
                     .inheritIO()
                     .directory(File("$basePath."))
                     .start()
@@ -169,7 +174,10 @@ class ForgeManager(private val configFile: ConfigFile) {
                     if (configFile.launch.spongefix) {
                         lockFile.spongeBootstrapper
                     } else {
-                        "forge-${lockFile.mcVersion}-${lockFile.forgeVersion}-universal.jar"
+                        configFile.launch.startFile
+                                .replace("{{@loaderversion@}}", lockFile.forgeVersion)
+                                .replace("{{@mcversion@}}", lockFile.forgeVersion)
+                        // "forge-${lockFile.mcVersion}-${lockFile.forgeVersion}-universal.jar"
                     }
             if (!File(filename).exists()) {
                 filename = "forge-${lockFile.mcVersion}-${lockFile.forgeVersion}.jar"
@@ -198,7 +206,7 @@ class ForgeManager(private val configFile: ConfigFile) {
             if (configFile.launch.javaArgs.none { it.trim().startsWith("-Xms") }) {
                 try {
                     val xmx = Integer.parseInt(configFile.launch.maxRam.substring(0, configFile.launch.maxRam.length - 1))
-                    val xms = Math.max(1, xmx / 2)
+                    val xms = max(1, xmx / 2)
                     val ending = configFile.launch.maxRam.substring(configFile.launch.maxRam.length - 1)
                     arguments.add("-Xms$xms$ending")
 
