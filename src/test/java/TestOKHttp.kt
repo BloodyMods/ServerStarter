@@ -38,7 +38,7 @@ class TestOKHttp {
         println("file = ${file.absolutePath}")
         val sink = Okio.buffer(Okio.sink(file))
 
-        val source = res.body()?.source()
+        val source = res.body()?.source() ?: return
         sink.writeAll(source)
         sink.close()
 

@@ -250,7 +250,7 @@ class LoaderManager(private val configFile: ConfigFile) {
 
     }
 
-    fun startAndWaitForProcess(args: List<String>) {
+    private fun startAndWaitForProcess(args: List<String>) {
         ProcessBuilder(args).apply {
             inheritIO()
             directory(File(configFile.install.baseInstallPath + "."))
