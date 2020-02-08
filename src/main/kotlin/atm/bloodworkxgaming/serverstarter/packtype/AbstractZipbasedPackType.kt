@@ -13,7 +13,7 @@ abstract class AbstractZipbasedPackType(private val configFile: ConfigFile) : IP
     protected val basePath = configFile.install.baseInstallPath
 
     override fun installPack() {
-        if (!configFile.install.modpackUrl.isEmpty()) {
+        if (configFile.install.modpackUrl.isNotEmpty()) {
             val url = configFile.install.modpackUrl
             File(basePath).mkdirs()
 

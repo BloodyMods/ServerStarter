@@ -36,8 +36,8 @@ data class LaunchSettings(
 data class InstallConfig(
         var mcVersion: String = "",
 
-        var forgeVersion: String = "",
-        var forgeInstallerUrl: String = "",
+        var loaderVersion: String = "",
+        var installerUrl: String = "",
         var installerArguments: List<String> = Collections.emptyList(),
 
         var modpackUrl: String = "",
@@ -50,7 +50,7 @@ data class InstallConfig(
         var localFiles: List<LocalFile> = Collections.emptyList(),
 
         var checkFolder: Boolean = false,
-        var installForge: Boolean = false,
+        var installLoader: Boolean = false,
 
         var spongeBootstrapper: String = "") {
 

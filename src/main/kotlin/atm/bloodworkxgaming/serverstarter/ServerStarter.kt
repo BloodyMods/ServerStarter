@@ -17,12 +17,14 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileNotFoundException
 import java.io.IOException
+import kotlin.system.exitProcess
 
 
 class ServerStarter(args: Array<String>) {
     companion object {
         private val rep: Representer = Representer()
         private val options: DumperOptions = DumperOptions()
+        private const val CURRENT_SPEC = 2
 
         val LOGGER = PrimitiveLogger(File("serverstarter.log"))
         var lockFile: LockFile
@@ -42,6 +44,10 @@ class ServerStarter(args: Array<String>) {
                 throw InitException("Failed to load class", e)
             }
 
+            if (config._specver < CURRENT_SPEC) {
+                LOGGER.error(ansi().bgRed().fgBlack().a("You are loading with an older Version of the specification!!"))
+                LOGGER.error(ansi().bgRed().fgBlack().a("Make sure you have updated your config.yaml file!"))
+            }
         }
 
         /**
@@ -119,19 +125,19 @@ class ServerStarter(args: Array<String>) {
             info("ConfigFile: $config", true)
             info("LockFile: $lockFile", true)
 
-            info(ansi().fgRed().a("::::::::::::::::::::::::::::::::::::::::::::::::::::"))
-            info(ansi().fgBrightBlue().a("   Minecraft-Forge Server install/launcher jar"))
-            info(ansi().fgBrightBlue().a("   (Created by the ").fgGreen().a("\"Team RAM\"").fgBrightBlue().a(""))
-            info(ansi().fgRed().a("::::::::::::::::::::::::::::::::::::::::::::::::::::"))
+            info(ansi().fgRed().a(":::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::"))
+            info(ansi().fgBrightBlue().a("   Minecraft ServerStarter install/launcher jar"))
+            info(ansi().fgBrightBlue().a("   (Created by ").fgGreen().a("BloodWorkXGaming").fgBrightBlue().a(" with the help of ").fgGreen().a("\"Team RAM\"").fgBrightBlue().a(")"))
+            info(ansi().fgRed().a(":::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::"))
             info("")
-            info("   This jar will launch a Minecraft Forge Modded server")
+            info("   This jar will launch a Minecraft Forge/Fabric Modded server")
             info("")
             info(ansi().a("   Github:    ").fgBrightBlue().a("https://github.com/BloodyMods/ServerStarter"))
             info(ansi().a("   Discord:   ").fgBrightBlue().a("https://discord.gg/A3c5YfV"))
             info("")
             info(ansi().a("You are playing ").fgGreen().a(config.modpack.name))
             info("Starting to install/launch the server, lean back!")
-            info(ansi().fgRed().a("::::::::::::::::::::::::::::::::::::::::::::::::::::"))
+            info(ansi().fgRed().a(":::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::"))
             info("")
         }
     }
@@ -140,11 +146,11 @@ class ServerStarter(args: Array<String>) {
 
         if (!InternetManager.checkConnection() && config.launch.checkOffline) {
             LOGGER.error("Problems with the Internet connection, shutting down.")
-            System.exit(-1)
+            exitProcess(-1)
         }
 
 
-        val forgeManager = ForgeManager(config)
+        val forgeManager = LoaderManager(config)
         if (lockFile.checkShouldInstall(config) || installOnly) {
             val packtype = IPackType.createPackType(config.install.modpackFormat, config)
                     ?: throw InitException("Unknown pack format given in config, shutting down.")
@@ -155,10 +161,10 @@ class ServerStarter(args: Array<String>) {
             saveLockFile(lockFile)
 
 
-            if (config.install.installForge) {
+            if (config.install.installLoader) {
                 val forgeVersion = packtype.getForgeVersion()
                 val mcVersion = packtype.getMCVersion()
-                forgeManager.installForge(config.install.baseInstallPath, forgeVersion, mcVersion)
+                forgeManager.installLoader(config.install.baseInstallPath, forgeVersion, mcVersion)
             }
 
             if (config.launch.spongefix) {
@@ -178,7 +184,7 @@ class ServerStarter(args: Array<String>) {
 
         if (installOnly) {
             LOGGER.info("Install only mod, exiting now.")
-            System.exit(0)
+            exitProcess(0)
         }
 
         forgeManager.handleServer()
@@ -186,6 +192,7 @@ class ServerStarter(args: Array<String>) {
 }
 
 fun main(args: Array<String>) {
+    System.setProperty("jansi.passthrough", "true")
     AnsiConsole.systemInstall()
 
     try {

@@ -51,7 +51,7 @@ class PrimitiveLogger(outputFile: File) {
         }
     }
 
-    fun error(message: String?, throwable: Throwable? = null) {
+    fun error(message: Any?, throwable: Throwable? = null) {
         var m = currentTimeAnsi().fgRed().a("[ERROR] ").bgDefault().a(message).reset().newline().toString()
 
         if (throwable != null) {

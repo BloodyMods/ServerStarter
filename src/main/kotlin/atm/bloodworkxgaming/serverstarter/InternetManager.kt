@@ -53,9 +53,11 @@ object InternetManager {
 
         source ?: throw IOException("Message body or source from $url was null")
 
-        dest.parentFile?.mkdirs()
-        Okio.buffer(Okio.sink(dest)).use {
-            it.writeAll(source)
+        source.use {
+            dest.parentFile?.mkdirs()
+            Okio.buffer(Okio.sink(dest)).use {
+                it.writeAll(source)
+            }
         }
     }
 }

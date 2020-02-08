@@ -21,7 +21,7 @@ class ZipFilePackType(configFile: ConfigFile) : AbstractZipbasedPackType(configF
     override fun postProcessing() {
     }
 
-    private var forgeVersion: String = configFile.install.forgeVersion
+    private var forgeVersion: String = configFile.install.loaderVersion
     private var mcVersion: String = configFile.install.mcVersion
     private val oldFiles = File(basePath + "OLD_TO_DELETE/")
 

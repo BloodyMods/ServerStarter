@@ -14,7 +14,6 @@ import java.io.FileInputStream
 import java.io.IOException
 import java.io.InputStreamReader
 import java.net.URISyntaxException
-import java.nio.file.FileSystems
 import java.nio.file.PathMatcher
 import java.nio.file.Paths
 import java.util.*
@@ -25,7 +24,7 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 
 open class CursePackType(private val configFile: ConfigFile) : AbstractZipbasedPackType(configFile) {
-    private var forgeVersion: String = configFile.install.forgeVersion
+    private var forgeVersion: String = configFile.install.loaderVersion
     private var mcVersion: String = configFile.install.mcVersion
     private val oldFiles = File(basePath + "OLD_TO_DELETE/")
 
@@ -181,7 +180,7 @@ open class CursePackType(private val configFile: ConfigFile) : AbstractZipbasedP
         LOGGER.info("Requesting Download links from cursemeta.")
 
         mods.parallelStream().forEach { mod ->
-            if (!ignoreSet.isEmpty() && ignoreSet.contains(mod.projectID)) {
+            if (ignoreSet.isNotEmpty() && ignoreSet.contains(mod.projectID)) {
                 LOGGER.info("Skipping mod with projectID: " + mod.projectID)
                 return@forEach
             }
@@ -312,7 +311,7 @@ open class CursePackType(private val configFile: ConfigFile) : AbstractZipbasedP
         val secondFail = ArrayList<String>()
         fallbackList.forEach { s -> processSingleMod(s, count, totalCount, secondFail, ignorePatterns) }
 
-        if (!secondFail.isEmpty()) {
+        if (secondFail.isNotEmpty()) {
             LOGGER.warn("Failed to download (a) mod(s):")
             for (s in secondFail) {
                 LOGGER.warn("\t" + s)

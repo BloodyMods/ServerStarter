@@ -1,18 +1,18 @@
 package atm.bloodworkxgaming.serverstarter.config
 
 data class LockFile(
-        var forgeInstalled: Boolean = false,
+        var loaderInstalled: Boolean = false,
         var packInstalled: Boolean = false,
-        var forgeVersion: String = "NONE",
+        var loaderVersion: String = "NONE",
         var mcVersion: String = "NONE",
         var packUrl: String = "NONE",
         var spongeBootstrapper: String = "NONE") {
 
 
     fun checkShouldInstall(configFile: ConfigFile): Boolean {
-        return (!forgeInstalled
+        return (!loaderInstalled
                 || !packInstalled
-                || configFile.install.forgeVersion.isNotEmpty() && forgeVersion != configFile.install.forgeVersion
+                || configFile.install.loaderVersion.isNotEmpty() && loaderVersion != configFile.install.loaderVersion
                 || packUrl != configFile.install.modpackUrl)
     }
 }
