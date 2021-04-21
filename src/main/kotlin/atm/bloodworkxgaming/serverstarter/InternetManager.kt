@@ -33,8 +33,10 @@ class InternetManager(private val configFile: ConfigFile) {
                     .build()
 
                 val r = try {
-                    val res = httpClient.newCall(req).execute()
-                    res.isSuccessful
+                    httpClient.newCall(req).execute().use {
+                        it.isSuccessful
+                        true
+                    }
                 } catch (ex: IOException) {
                     false
                 }
