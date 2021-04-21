@@ -144,15 +144,17 @@ class ServerStarter(args: Array<String>) {
 
     fun startLoading() {
 
-        if (!InternetManager.checkConnection() && config.launch.checkOffline) {
+        val internetManager = InternetManager(config)
+
+        if (!internetManager.checkConnection() && config.launch.checkOffline) {
             LOGGER.error("Problems with the Internet connection, shutting down.")
             exitProcess(-1)
         }
 
 
-        val forgeManager = LoaderManager(config)
+        val forgeManager = LoaderManager(config, internetManager)
         if (lockFile.checkShouldInstall(config) || installOnly) {
-            val packtype = IPackType.createPackType(config.install.modpackFormat, config)
+            val packtype = IPackType.createPackType(config.install.modpackFormat, config, internetManager)
                     ?: throw InitException("Unknown pack format given in config, shutting down.")
 
             packtype.installPack()
@@ -173,9 +175,9 @@ class ServerStarter(args: Array<String>) {
             }
 
 
-            val filemanger = FileManager(config)
-            filemanger.installAdditionalFiles()
-            filemanger.installLocalFiles()
+            val fileManager = FileManager(config, internetManager)
+            fileManager.installAdditionalFiles()
+            fileManager.installLocalFiles()
 
 
         } else {

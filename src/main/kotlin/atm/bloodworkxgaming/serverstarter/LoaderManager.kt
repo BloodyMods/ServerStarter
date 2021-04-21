@@ -17,7 +17,7 @@ import java.time.temporal.ChronoUnit
 import java.util.*
 import kotlin.math.max
 
-class LoaderManager(private val configFile: ConfigFile) {
+class LoaderManager(private val configFile: ConfigFile, private val internetManager: InternetManager) {
 
     fun handleServer() {
         val startTimes = ArrayList<LocalDateTime>()
@@ -112,7 +112,7 @@ class LoaderManager(private val configFile: ConfigFile) {
 
         try {
             LOGGER.info("Attempting to download installer from $url")
-            InternetManager.downloadToFile(url, installerPath)
+            internetManager.downloadToFile(url, installerPath)
 
             LOGGER.info("Starting installation of Loader, installer output incoming")
             LOGGER.info("Check log for installer for more information", true)
@@ -149,7 +149,7 @@ class LoaderManager(private val configFile: ConfigFile) {
         val downloadFile = File(basePath + filename)
 
         try {
-            InternetManager.downloadToFile(configFile.install.spongeBootstrapper, downloadFile)
+            internetManager.downloadToFile(configFile.install.spongeBootstrapper, downloadFile)
         } catch (e: IOException) {
             LOGGER.error("Error while downloading bootstrapper", e)
         }

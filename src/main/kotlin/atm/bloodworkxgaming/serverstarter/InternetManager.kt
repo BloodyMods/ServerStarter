@@ -1,19 +1,22 @@
 package atm.bloodworkxgaming.serverstarter
 
 import atm.bloodworkxgaming.serverstarter.ServerStarter.Companion.LOGGER
+import atm.bloodworkxgaming.serverstarter.config.ConfigFile
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okio.Okio
+import okio.buffer
+import okio.sink
 import java.io.File
 import java.io.IOException
 import java.net.InetAddress
 import java.util.concurrent.TimeUnit
 
-object InternetManager {
+class InternetManager(private val configFile: ConfigFile) {
     val httpClient = OkHttpClient.Builder()
-            .connectTimeout(30, TimeUnit.SECONDS)
-            .readTimeout(30, TimeUnit.SECONDS)
-            .build()!!
+            .connectTimeout(configFile.install.connectTimeout, TimeUnit.SECONDS)
+            .readTimeout(configFile.install.readTimeout, TimeUnit.SECONDS)
+            .build()
 
     private val urls = listOf("8.8.8.8", "1.0.0.1")
 
@@ -49,13 +52,13 @@ object InternetManager {
                 .build()
 
         val res = httpClient.newCall(req).execute()
-        val source = res?.body()?.source()
+        val source = res.body?.source()
 
         source ?: throw IOException("Message body or source from $url was null")
 
         source.use {
             dest.parentFile?.mkdirs()
-            Okio.buffer(Okio.sink(dest)).use {
+            dest.sink().buffer().use {
                 it.writeAll(source)
             }
         }

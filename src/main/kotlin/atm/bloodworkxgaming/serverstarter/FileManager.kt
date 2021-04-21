@@ -11,7 +11,7 @@ import java.net.URI
 import java.net.URISyntaxException
 import java.net.URL
 
-class FileManager(private val configFile: ConfigFile) {
+class FileManager(private val configFile: ConfigFile, private val internetManager: InternetManager) {
 
     fun installAdditionalFiles() {
         LOGGER.info("Starting to installing Additional Files")
@@ -25,7 +25,7 @@ class FileManager(private val configFile: ConfigFile) {
     private fun handleAdditionalFile(file: AdditionalFile, fallbackList: MutableList<AdditionalFile>) {
         LOGGER.info("Starting to download $file")
         try {
-            InternetManager.downloadToFile(file.url, File(configFile.install.baseInstallPath + file.destination))
+            internetManager.downloadToFile(file.url, File(configFile.install.baseInstallPath + file.destination))
         } catch (e: IOException) {
             LOGGER.error("Failed to download additional file", e)
             fallbackList.add(file)

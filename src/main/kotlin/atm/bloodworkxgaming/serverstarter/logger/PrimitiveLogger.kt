@@ -1,6 +1,8 @@
 package atm.bloodworkxgaming.serverstarter.logger
 
 import okio.Okio
+import okio.buffer
+import okio.sink
 import org.fusesource.jansi.Ansi
 import java.io.File
 import java.io.IOException
@@ -12,7 +14,7 @@ import java.time.format.DateTimeFormatter
 class PrimitiveLogger(outputFile: File) {
     private val pattern = "\\x1b\\[[0-9;]*m".toRegex()
     private val dateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss")
-    private val bufferedSink = Okio.buffer(Okio.sink(outputFile))
+    private val bufferedSink = outputFile.sink().buffer()
 
     init {
         if (outputFile.exists()) {

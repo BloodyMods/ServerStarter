@@ -134,6 +134,13 @@ install:
   # Only needed if you have spongefix enabled
   spongeBootstrapper: https://github.com/simon816/SpongeBootstrap/releases/download/v0.7.1/SpongeBootstrap-0.7.1.jar
 
+  # Time in seconds before the connection attempt to any webservice like forge/curseforge times out
+  # Only increase this timer if you have problems
+  connectTimeout: 30
+
+  # Time in seconds before the read attempt to any webservice like forge/curseforge times out
+  # Only increase this timer if you have problems
+  readTimeout: 30
 
 
 

@@ -1,5 +1,6 @@
 package atm.bloodworkxgaming.serverstarter.packtype.zip
 
+import atm.bloodworkxgaming.serverstarter.InternetManager
 import atm.bloodworkxgaming.serverstarter.ServerStarter.Companion.LOGGER
 import atm.bloodworkxgaming.serverstarter.config.ConfigFile
 import atm.bloodworkxgaming.serverstarter.packtype.AbstractZipbasedPackType
@@ -13,7 +14,7 @@ import java.nio.file.Paths
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 
-class ZipFilePackType(configFile: ConfigFile) : AbstractZipbasedPackType(configFile) {
+class ZipFilePackType(configFile: ConfigFile, internetManager: InternetManager) : AbstractZipbasedPackType(configFile, internetManager) {
     override fun cleanUrl(url: String): String {
         return url
     }

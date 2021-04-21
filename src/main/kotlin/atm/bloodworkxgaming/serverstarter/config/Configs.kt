@@ -52,7 +52,10 @@ data class InstallConfig(
         var checkFolder: Boolean = false,
         var installLoader: Boolean = false,
 
-        var spongeBootstrapper: String = "") {
+        var spongeBootstrapper: String = "",
+        var connectTimeout: Long = 30,
+        var readTimeout: Long = 30,
+        ) {
 
 
     @Suppress("UNCHECKED_CAST")

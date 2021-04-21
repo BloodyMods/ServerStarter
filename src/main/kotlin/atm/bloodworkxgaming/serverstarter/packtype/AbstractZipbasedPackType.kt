@@ -9,7 +9,7 @@ import java.nio.file.FileSystems
 import java.nio.file.PathMatcher
 import java.util.zip.ZipInputStream
 
-abstract class AbstractZipbasedPackType(private val configFile: ConfigFile) : IPackType {
+abstract class AbstractZipbasedPackType(private val configFile: ConfigFile, protected val internetManager: InternetManager) : IPackType {
     protected val basePath = configFile.install.baseInstallPath
 
     override fun installPack() {
@@ -58,7 +58,7 @@ abstract class AbstractZipbasedPackType(private val configFile: ConfigFile) : IP
         try {
             val to = File(basePath + "modpack-download.zip")
 
-            InternetManager.downloadToFile(url, to)
+            internetManager.downloadToFile(url, to)
             ServerStarter.LOGGER.info("Downloaded the modpack zip file to " + to.absolutePath)
 
             return to

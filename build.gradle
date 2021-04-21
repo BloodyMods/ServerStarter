@@ -1,8 +1,9 @@
 plugins {
     id 'java'
-    id "org.jetbrains.kotlin.jvm" version "1.2.51"
-    id "com.github.johnrengelman.shadow" version "2.0.4"
-    id "com.github.breadmoirai.github-release" version "2.2.9"
+    id "org.jetbrains.kotlin.jvm" version "1.4.32"
+    id "com.github.johnrengelman.shadow" version "6.1.0"
+    id "com.github.breadmoirai.github-release" version "2.2.12"
+    id "com.github.ben-manes.versions" version "0.38.0"
 }
 
 group = 'atm.bloodworkxgaming'
@@ -15,27 +16,25 @@ repositories {
 
     maven {
         name = 'DVS1'
-        url = 'http://dvs1.progwml6.com/files/maven'
+        url = 'https://dvs1.progwml6.com/files/maven'
     }
 }
 
 dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.12'
+    testCompile group: 'junit', name: 'junit', version: '4.13.2'
 
-    compile group: 'org.yaml', name: 'snakeyaml', version: '1.21'
+    compile group: 'org.yaml', name: 'snakeyaml', version: '1.28'
 
 
-    compile group: 'commons-io', name: 'commons-io', version: '2.6'
-    compile 'com.squareup.okhttp3:okhttp:3.10.0'
+    compile group: 'commons-io', name: 'commons-io', version: '2.8.0'
+    compile 'com.squareup.okhttp3:okhttp:4.9.1'
 
-    compile group: 'com.google.code.gson', name: 'gson', version: '2.8.4'
+    compile group: 'com.google.code.gson', name: 'gson', version: '2.8.6'
 
     compile("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 
     // https://mvnrepository.com/artifact/org.fusesource.jansi/jansi
-    compile group: 'org.fusesource.jansi', name: 'jansi', version: '1.17.1'
-
-    compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.16.20'
+    compile group: 'org.fusesource.jansi', name: 'jansi', version: '2.3.2'
 }
 
 shadowJar {
@@ -91,7 +90,7 @@ task zipDist (type: Zip) {
 
 githubRelease {
     token = getGithubKey()
-    owner = "AllTheMods"
+    owner = "BloodWorkXGaming"
     repo = "ServerStarter"
 
     releaseAssets file("$buildDir/release/serverstarter-${version}.zip")

@@ -1,8 +1,9 @@
 package atm.bloodworkxgaming.serverstarter.packtype.curse
 
+import atm.bloodworkxgaming.serverstarter.InternetManager
 import atm.bloodworkxgaming.serverstarter.config.ConfigFile
 
-class CurseIDPackType(configFile: ConfigFile) : CursePackType(configFile) {
+class CurseIDPackType(configFile: ConfigFile, internetManager: InternetManager) : CursePackType(configFile, internetManager) {
     override fun cleanUrl(url: String): String {
         val split = url.split(":")
         if (split.size != 2) {

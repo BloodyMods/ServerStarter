@@ -1,5 +1,6 @@
 package atm.bloodworkxgaming.serverstarter.packtype
 
+import atm.bloodworkxgaming.serverstarter.InternetManager
 import atm.bloodworkxgaming.serverstarter.config.ConfigFile
 import atm.bloodworkxgaming.serverstarter.packtype.curse.CurseIDPackType
 import atm.bloodworkxgaming.serverstarter.packtype.curse.CursePackType
@@ -7,7 +8,7 @@ import atm.bloodworkxgaming.serverstarter.packtype.zip.ZipFilePackType
 
 interface IPackType {
     companion object {
-        private val packtype = mutableMapOf<String, (ConfigFile) -> IPackType>(
+        private val packtype = mutableMapOf<String, (ConfigFile, InternetManager) -> IPackType>(
                 Pair("curse", ::CursePackType),
                 Pair("curseforge", ::CursePackType),
                 Pair("curseid", ::CurseIDPackType),
@@ -15,8 +16,8 @@ interface IPackType {
                 Pair("zipfile", ::ZipFilePackType)
         )
 
-        fun createPackType(packTypeName: String, configFile: ConfigFile): IPackType? {
-            return packtype[packTypeName]?.invoke(configFile)
+        fun createPackType(packTypeName: String, configFile: ConfigFile, internetManager: InternetManager): IPackType? {
+            return packtype[packTypeName]?.invoke(configFile, internetManager)
         }
     }
 

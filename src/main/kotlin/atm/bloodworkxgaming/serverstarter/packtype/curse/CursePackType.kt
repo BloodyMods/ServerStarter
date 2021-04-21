@@ -23,7 +23,7 @@ import java.util.regex.Pattern
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 
-open class CursePackType(private val configFile: ConfigFile) : AbstractZipbasedPackType(configFile) {
+open class CursePackType(private val configFile: ConfigFile, internetManager: InternetManager) : AbstractZipbasedPackType(configFile, internetManager) {
     private var forgeVersion: String = configFile.install.loaderVersion
     private var mcVersion: String = configFile.install.mcVersion
     private val oldFiles = File(basePath + "OLD_TO_DELETE/")
@@ -196,11 +196,11 @@ open class CursePackType(private val configFile: ConfigFile) : AbstractZipbasedP
                         .header("Content-Type", "application/json")
                         .build()
 
-                val res = InternetManager.httpClient.newCall(request).execute()
+                val res = internetManager.httpClient.newCall(request).execute()
 
                 if (!res.isSuccessful)
                     throw IOException("Request to $url was not successful.")
-                val body = res.body() ?: throw IOException("Request to $url returned a null body.")
+                val body = res.body ?: throw IOException("Request to $url returned a null body.")
 
                 val jsonRes = JsonParser().parse(body.string()).asJsonObject
                 LOGGER.info("Response from manifest query: $jsonRes", true)
@@ -218,73 +218,6 @@ open class CursePackType(private val configFile: ConfigFile) : AbstractZipbasedP
         processMods(urls)
 
     }
-
-    //region >>>>>>> Stuff for when cursemeta works again:
-    /*
-    private void downloadMods(List<ModEntryRaw> mods) {
-        Set<String> ignoreSet = new HashSet<>();
-        List<Object> ignoreListTemp = configFile.install.getFormatSpecificSettingOrDefault("ignoreProject", null);
-
-        if (ignoreListTemp != null)
-            for (Object o : ignoreListTemp) {
-                if (o instanceof String)
-                    ignoreSet.add((String) o);
-
-                if (o instanceof Integer)
-                    ignoreSet.add(String.valueOf(o));
-            }
-
-        // constructs the body
-        JsonObject request = new JsonObject();
-        JsonArray array = new JsonArray();
-        for (ModEntryRaw mod : mods) {
-            if (!ignoreSet.isEmpty() && ignoreSet.contains(mod.projectID)) {
-                LOGGER.info("Skipping mod with projectID: " + mod.projectID);
-                continue;
-            }
-
-            JsonObject objMod = new JsonObject();
-            objMod.addProperty("AddOnID", mod.projectID);
-            objMod.addProperty("FileID", mod.fileID);
-            array.add(objMod);
-        }
-        request.add("addOnFileKeys", array);
-
-        LOGGER.info("Requesting Download links from cursemeta.");
-        LOGGER.info("About to make a request to cursemeta with body: " + request.toString(), true);
-
-        try {
-            HttpResponse<JsonNode> res = Unirest
-                    .post(configFile.install.getFormatSpecificSettingOrDefault("cursemeta", "https://cursemeta.dries007.net")
-                            + "/api/v2/direct/GetAddOnFiles")
-                    .header("User-Agent", "All the mods server installer.")
-                    .header("Content-Type", "application/json")
-                    .body(request.toString())
-                    .asJson();
-
-            if (res.getStatus() != 200)
-                throw new UnirestException("Response was not OK");
-
-            // Gets the download links for the mods
-            List<String> modsToDownload = new ArrayList<>();
-            JsonArray jsonRes = new JsonParser().parse(res.getBody().toString()).getAsJsonArray();
-            for (JsonElement modEntry : jsonRes) {
-                modsToDownload.add(modEntry
-                        .getAsJsonObject()
-                        .getAsJsonArray("Value").get(0)
-                        .getAsJsonObject()
-                        .getAsJsonPrimitive("DownloadURL").getAsString());
-            }
-
-            LOGGER.info("Response from manifest query: " + jsonRes, true);
-            LOGGER.info("Mods to download: " + modsToDownload, true);
-            processMods(modsToDownload);
-
-        } catch (UnirestException e) {
-            e.printStackTrace();
-        }
-    }*/
-    //endregion
 
     /**
      * Downloads all mods, with a second fallback if failed
@@ -337,7 +270,7 @@ open class CursePackType(private val configFile: ConfigFile) : AbstractZipbasedP
                 }
             }
 
-            InternetManager.downloadToFile(mod, File(basePath + "mods/" + modName))
+            internetManager.downloadToFile(mod, File(basePath + "mods/" + modName))
             LOGGER.info("[" + String.format("% 3d", counter.incrementAndGet()) + "/" + totalCount + "] Downloaded mod: " + modName)
 
         } catch (e: IOException) {
