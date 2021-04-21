@@ -205,6 +205,8 @@ fun main(args: Array<String>) {
 
     } catch (e: InitException) {
         ServerStarter.LOGGER.error(e.message)
+    } catch (e: DownloadLoaderException) {
+        ServerStarter.LOGGER.error("Stopping the process as downloading the ModLoader failed", e)
     } catch (e: Throwable) {
         ServerStarter.LOGGER.error("Some uncaught error happened.", e)
     }

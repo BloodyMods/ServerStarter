@@ -10,12 +10,16 @@ import org.fusesource.jansi.Ansi.ansi
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
+import java.lang.Exception
+import java.lang.RuntimeException
 import java.time.LocalDateTime
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.util.*
 import kotlin.math.max
+
+class DownloadLoaderException(message: String, exception: Exception) : IOException(message, exception)
 
 class LoaderManager(private val configFile: ConfigFile, private val internetManager: InternetManager) {
 
@@ -99,7 +103,7 @@ class LoaderManager(private val configFile: ConfigFile, private val internetMana
 
     }
 
-    fun installLoader(basePath: String, loaderVersion: String, mcVersion: String) {
+    fun installLoader(basePath: String, loaderVersion: String, mcVersion: String): Boolean {
         // val versionString = "$mcVersion-$forgeVersion"
         // val url = "http://files.minecraftforge.net/maven/net/minecraftforge/forge/$versionString/forge-$versionString-installer.jar"
         val url = configFile.install.installerUrl
@@ -137,11 +141,14 @@ class LoaderManager(private val configFile: ConfigFile, private val internetMana
 
             checkEULA(basePath)
         } catch (e: IOException) {
-            LOGGER.error("Problem while installing Loader", e)
+            LOGGER.error("Problem while installing Loader from $url", e)
+            throw DownloadLoaderException("Problem while installing Loader from $url", e)
         } catch (e: InterruptedException) {
-            LOGGER.error("Problem while installing Loader", e)
+            LOGGER.error("Problem while installing Loader from $url", e)
+            throw DownloadLoaderException("Problem while installing Loader from $url", e)
         }
 
+        return true
     }
 
     fun installSpongeBootstrapper(basePath: String): String {

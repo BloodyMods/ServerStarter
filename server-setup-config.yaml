@@ -181,6 +181,7 @@ launch:
   startFile: "fabric-server-launch.jar"
 
   # In case you have multiple javas installed you can add a absolute path to it here
+  # The Path has to be enclosed in \" like in the example if it has spaces (or for safety just include them always.)
   # if the value is "", null, or ~ then 'java' from PATH is going to be used
   # Example: "\"C:/Program Files/Java/jre1.8.0_201/bin/java.exe\""
   forcedJavaPath: "\"C:/Program Files/Java/jre1.8.0_201/bin/java.exe\""
