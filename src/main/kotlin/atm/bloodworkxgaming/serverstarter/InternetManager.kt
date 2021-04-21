@@ -18,19 +18,42 @@ class InternetManager(private val configFile: ConfigFile) {
             .readTimeout(configFile.install.readTimeout, TimeUnit.SECONDS)
             .build()
 
-    private val urls = listOf("8.8.8.8", "1.0.0.1")
 
+    // Checking for connections seems to be broken on linux without root priviliges
+    // Therefore we use HTTP get requests on linux to check for a valid connection
     fun checkConnection(): Boolean {
         var reached = 0
+
+        val urls = if (OSUtil.isWindows) {
+            listOf("8.8.8.8", "1.0.0.1")
+        }  else {
+            listOf("example.com", "google.com")
+        }
+
 
         for (url in urls) {
             try {
                 LOGGER.info("Pinging $url.")
-                val r = InetAddress.getByName(url).isReachable(1000)
+                val r = if (OSUtil.isWindows) {
+                     InetAddress.getByName(url).isReachable(1000)
+                } else {
+                    val req = Request.Builder()
+                        .url(url)
+                        .get()
+                        .build()
+
+                    try {
+                        val res = httpClient.newCall(req).execute()
+                        res.isSuccessful
+                    }  catch (ex: IOException) {
+                        false
+                    }
+                }
+
                 LOGGER.info("Reached $url: $r")
                 if (r) reached++
             } catch (e: IOException) {
-                LOGGER.error("Error while pinging", e)
+                LOGGER.error("Error while attempting to reach", e)
             }
         }
 

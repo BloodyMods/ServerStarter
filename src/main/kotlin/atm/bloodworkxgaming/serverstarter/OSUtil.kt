@@ -10,4 +10,5 @@ object OSUtil {
     }
 
     val isLinux: Boolean = osName.toLowerCase().startsWith("linux")
+    val isWindows: Boolean = osName.toLowerCase().startsWith("win")
 }

@@ -62,7 +62,7 @@ class ServerStarter(args: Array<String>) {
             val file: ConfigFile
 
             try {
-                file = File("server-setup-config.yaml").inputStream().use { yaml.load<ConfigFile>(it) }
+                file = File("server-setup-config.yaml").inputStream().use { yaml.load(it) }
             } catch (e: FileNotFoundException) {
                 LOGGER.error("There is no config file given.", e)
                 throw RuntimeException("No config file given.", e)
