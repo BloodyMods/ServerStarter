@@ -64,9 +64,9 @@ class InternetManager(private val configFile: ConfigFile) {
             .build()
 
         val res = httpClient.newCall(req).execute()
-        val source = res.body?.source()
+        if (!res.isSuccessful) throw IOException("HTTP error code: ${res.code} for $url")
 
-        if (!res.isSuccessful) throw IOException("HTTP error code: ${res.code()} for $url")
+        val source = res.body?.source()
         source ?: throw IOException("Message body or source from $url was null")
 
         source.use {
