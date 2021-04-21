@@ -120,7 +120,7 @@ class LoaderManager(private val configFile: ConfigFile, private val internetMana
 
             LOGGER.info("Starting installation of Loader, installer output incoming")
             LOGGER.info("Check log for installer for more information", true)
-            val java = if (configFile.launch.forcedJavaPath.isEmpty()) "java" else configFile.launch.forcedJavaPath
+            val java = if (configFile.launch.forcedJavaPath.isEmpty()) "java" else configFile.launch.processedForcedJavaPath
             val installer = ProcessBuilder(java, "-jar", installerPath.absolutePath, *configFile.install.installerArguments.toTypedArray())
                     .inheritIO()
                     .directory(File("$basePath."))
@@ -207,7 +207,7 @@ class LoaderManager(private val configFile: ConfigFile, private val internetMana
                 arguments.addAll(configFile.launch.preJavaArgs.trim().split(' ').dropWhile { it.isEmpty() })
             }
 
-            val java = if (configFile.launch.forcedJavaPath.isEmpty()) "java" else configFile.launch.forcedJavaPath
+            val java = if (configFile.launch.forcedJavaPath.isEmpty()) "java" else configFile.launch.processedForcedJavaPath
             arguments.add(java)
             arguments.addAll(configFile.launch.javaArgs)
             arguments.add("-Xmx${configFile.launch.maxRam}")

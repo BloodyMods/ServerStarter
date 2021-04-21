@@ -3,59 +3,73 @@ package atm.bloodworkxgaming.serverstarter.config
 import java.util.*
 
 data class AdditionalFile(
-        var url: String = "",
-        var destination: String = ""
+    var url: String = "",
+    var destination: String = ""
 )
 
 data class LocalFile(
-        var from: String = "",
-        var to: String = ""
+    var from: String = "",
+    var to: String = ""
 )
 
 data class ModpackConfig(
-        var name: String = "",
-        var description: String = ""
+    var name: String = "",
+    var description: String = ""
 )
 
 data class LaunchSettings(
-        var spongefix: Boolean = false,
-        var ramDisk: Boolean = false,
-        var checkOffline: Boolean = false,
-        var maxRam: String = "",
+    var spongefix: Boolean = false,
+    var ramDisk: Boolean = false,
+    var checkOffline: Boolean = false,
+    var maxRam: String = "",
 
-        var startFile: String = "",
-        var javaArgs: List<String> = Collections.emptyList(),
-        var autoRestart: Boolean = false,
-        var crashLimit: Int = 0,
-        var crashTimer: String = "",
-        var preJavaArgs: String = "",
+    var startFile: String = "",
+    var javaArgs: List<String> = Collections.emptyList(),
+    var autoRestart: Boolean = false,
+    var crashLimit: Int = 0,
+    var crashTimer: String = "",
+    var preJavaArgs: String = "",
 
-        var forcedJavaPath: String = ""
-)
+    var forcedJavaPath: String = "",
+
+    ) {
+    val processedForcedJavaPath: String
+        get() {
+            var str = forcedJavaPath
+            val regex = Regex("\\\$\\{(.+)}")
+            for (matchResult in regex.findAll(forcedJavaPath)) {
+                val res = matchResult.groupValues.getOrNull(0) ?: continue
+                val inner = matchResult.groupValues.getOrNull(1) ?: continue
+                str = str.replace(res, System.getenv(inner))
+            }
+
+            return str
+        }
+}
 
 data class InstallConfig(
-        var mcVersion: String = "",
+    var mcVersion: String = "",
 
-        var loaderVersion: String = "",
-        var installerUrl: String = "",
-        var installerArguments: List<String> = Collections.emptyList(),
+    var loaderVersion: String = "",
+    var installerUrl: String = "",
+    var installerArguments: List<String> = Collections.emptyList(),
 
-        var modpackUrl: String = "",
-        var modpackFormat: String = "",
-        var formatSpecific: Map<String, Any> = Collections.emptyMap(),
+    var modpackUrl: String = "",
+    var modpackFormat: String = "",
+    var formatSpecific: Map<String, Any> = Collections.emptyMap(),
 
-        var baseInstallPath: String = "",
-        var ignoreFiles: List<String> = Collections.emptyList(),
-        var additionalFiles: List<AdditionalFile> = Collections.emptyList(),
-        var localFiles: List<LocalFile> = Collections.emptyList(),
+    var baseInstallPath: String = "",
+    var ignoreFiles: List<String> = Collections.emptyList(),
+    var additionalFiles: List<AdditionalFile> = Collections.emptyList(),
+    var localFiles: List<LocalFile> = Collections.emptyList(),
 
-        var checkFolder: Boolean = false,
-        var installLoader: Boolean = false,
+    var checkFolder: Boolean = false,
+    var installLoader: Boolean = false,
 
-        var spongeBootstrapper: String = "",
-        var connectTimeout: Long = 30,
-        var readTimeout: Long = 30,
-        ) {
+    var spongeBootstrapper: String = "",
+    var connectTimeout: Long = 30,
+    var readTimeout: Long = 30,
+) {
 
 
     @Suppress("UNCHECKED_CAST")
@@ -65,8 +79,8 @@ data class InstallConfig(
 }
 
 data class ConfigFile(
-        var _specver: Int = 0,
-        var modpack: ModpackConfig = ModpackConfig(),
-        var install: InstallConfig = InstallConfig(),
-        var launch: LaunchSettings = LaunchSettings()
+    var _specver: Int = 0,
+    var modpack: ModpackConfig = ModpackConfig(),
+    var install: InstallConfig = InstallConfig(),
+    var launch: LaunchSettings = LaunchSettings()
 )

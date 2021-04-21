@@ -184,7 +184,8 @@ launch:
   # The Path has to be enclosed in \" like in the example if it has spaces (or for safety just include them always.)
   # if the value is "", null, or ~ then 'java' from PATH is going to be used
   # Example: "\"C:/Program Files/Java/jre1.8.0_201/bin/java.exe\""
-  forcedJavaPath: "\"C:/Program Files/Java/jre1.8.0_201/bin/java.exe\""
+  # It also supports replacing with environment variables with ${ENV_VAR} e.g. ${JAVA_HOME}/
+  forcedJavaPath: "\"${JAVA_HOME}/bin/java.exe\""
 
   # Java args that are supposed to be used when the server launches
   # keep in mind java args often need ' - ' in front of it to work, use clarifying parentheses to make sure it uses it correctly
