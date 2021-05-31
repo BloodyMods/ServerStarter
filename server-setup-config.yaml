@@ -145,6 +145,9 @@ launch:
   # specifies the max amount of ram the server is supposed to launch with
   maxRam: 5G
 
+  # specifies the min amount of ram the server is supposed to launch with
+  minRam: 2G
+
   # specifies whether the server is supposed to auto restart after crash
   autoRestart: yes
 

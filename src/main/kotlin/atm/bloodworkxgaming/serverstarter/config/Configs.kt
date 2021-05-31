@@ -22,6 +22,7 @@ data class LaunchSettings(
     var ramDisk: Boolean = false,
     var checkOffline: Boolean = false,
     var maxRam: String = "",
+    var minRam: String = "",
 
     var startFile: String = "",
     var javaArgs: List<String> = Collections.emptyList(),

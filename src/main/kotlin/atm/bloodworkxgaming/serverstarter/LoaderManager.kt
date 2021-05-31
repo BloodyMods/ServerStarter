@@ -212,7 +212,9 @@ class LoaderManager(private val configFile: ConfigFile, private val internetMana
             arguments.addAll(configFile.launch.javaArgs)
             arguments.add("-Xmx${configFile.launch.maxRam}")
 
-            if (configFile.launch.javaArgs.none { it.trim().startsWith("-Xms") }) {
+            if (configFile.launch.minRam.isNotBlank()) {
+                arguments.add("-Xms${configFile.launch.minRam}")
+            } else if (configFile.launch.javaArgs.none { it.trim().startsWith("-Xms") }) {
                 try {
                     val xmx = Integer.parseInt(configFile.launch.maxRam.substring(0, configFile.launch.maxRam.length - 1))
                     val xms = max(1, xmx / 2)
