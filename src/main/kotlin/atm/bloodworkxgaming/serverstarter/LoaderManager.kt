@@ -184,7 +184,7 @@ class LoaderManager(private val configFile: ConfigFile, private val internetMana
                     } else {
                         configFile.launch.startFile
                                 .replace("{{@loaderversion@}}", lockFile.loaderVersion)
-                                .replace("{{@mcversion@}}", lockFile.loaderVersion)
+                                .replace("{{@mcversion@}}", lockFile.mcVersion)
                         // "forge-${lockFile.mcVersion}-${lockFile.forgeVersion}-universal.jar"
                     }
             /*if (!File(filename).exists()) {

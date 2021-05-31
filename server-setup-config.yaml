@@ -14,17 +14,17 @@ modpack:
 # settings regarding the installation of the modpack
 install:
   # version of minecraft, needs the exact version
-  mcVersion: 1.15.2
+  mcVersion: 1.16.5
 
   # exact version of forge or fabric that is supposed to be used
   # if this value is a null value so ( ~, null, or "" ) then the version from the mod pack is going to be used
-  loaderVersion: 0.5.2.39
+  loaderVersion: ~
 
   # If a custom installer is supposed to used, specify the url here: (Otherwise put "", ~ or null here)
   # supports variables: {{@loaderversion@}} and {{@mcversion@}}
-  # For forge: "http://files.minecraftforge.net/maven/net/minecraftforge/forge/{{@mcversion@}}-{{@loaderversion@}}/forge-{{@mcversion@}}-{{@loaderversion@}}-installer.jar"
+  # For forge: "https://files.minecraftforge.net/maven/net/minecraftforge/forge/{{@mcversion@}}-{{@loaderversion@}}/forge-{{@mcversion@}}-{{@loaderversion@}}-installer.jar"
   # For Fabric: "https://maven.fabricmc.net/net/fabricmc/fabric-installer/{{@loaderversion@}}/fabric-installer-{{@loaderversion@}}.jar"
-  installerUrl: "https://maven.fabricmc.net/net/fabricmc/fabric-installer/{{@loaderversion@}}/fabric-installer-{{@loaderversion@}}.jar"
+  installerUrl: "https://files.minecraftforge.net/maven/net/minecraftforge/forge/{{@mcversion@}}-{{@loaderversion@}}/forge-{{@mcversion@}}-{{@loaderversion@}}-installer.jar"
 
   # Installer Arguments
   # These Arguments have to be passed to the installer
@@ -38,62 +38,43 @@ install:
   # installerArguments:
   #   - "--installServer"
   installerArguments:
-    - "server"
-    - "-downloadMinecraft"
-
+    - "--installServer"
 
   # Link to where the file where the modpack can be distributed
   # This supports loading from local files as well for most pack types if there is file://{PathToFile} in the beginning
-  modpackUrl: https://github.com/AllOfFabric/AOF-2/releases/download/2.3.0/AOF.2.v2.3.0.zip
+  modpackUrl: https://media.forgecdn.net/files/3315/528/All+the+Mods+6-1.6.4.zip
 
   # This is used to specify in which format the modpack is distributed, the server launcher has to handle each individually if their format differs
   # current supported formats:
   # - curseforge or curse
   # - curseid
   # - zip or zipfile
-  modpackFormat: zip
+  modpackFormat: curse
 
   # Settings which are specific to the format used, might not be needed in some casese
   formatSpecific:
     # optional paramenter used for curse to specify a whole project to ignore (mostly if it is client side only)
     ignoreProject:
-      - 60089
-      - 250398
-      - 267602
-      - 225928
-      - 226406
-      - 232131
-      - 231275
-      - 282743
-      - 265917
-      - 240630
-      - 238747
-      - 243478
-      - 291926
-      - 293496
-      - 226447
-      - 271740
-      - 237701
-      - 285492
-      - 272515
-      - 251407
-      - 253729
-      - 291727
-      - 283649
-      - 295765
-      - 285742
-      - 292992
-      - 241140
-      - 317642
-      - 231453
-      - 349206
-      - 353051
-      - 357540
-      - 300569
       - 263420
       - 317780
-      - 254758
+      - 232131
+      - 231275
+      - 367706
+      - 261725
+      - 243863
+      - 305373
+      - 325492
+      - 296468
+      - 308240
+      - 362791
+      - 291788
+      - 326950
+      - 237701
+      - 391382
       - 358191
+      - 271740
+      - 428199
+      - 431430
 
   # The base path where the server should be installed to, ~ for current path
   baseInstallPath: setup/
@@ -102,19 +83,23 @@ install:
   # this can either use regex or glob {default glob: https://docs.oracle.com/javase/8/docs/api/java/nio/file/FileSystem.html#getPathMatcher-java.lang.String-}
   # specify with regex:.... or glob:.... if you want to force a matching type
   ignoreFiles:
+    - mods/Overrides.txt
     - mods/optifine*.jar
+    - mods/optiforge*.jar
     - resources/**
+    - packmenu/**
+    - openloader/resources/**
 
   # often a server needs more files, which are nearly useless on the client, such as tickprofiler
   # This is a list of files, each ' - ' is a new file:
   # url is the directlink to the file, destination is the path to where the file should be copied to
-  additionalFiles:
-    - url: https://media.forgecdn.net/files/2844/278/restrictedportals-1.15-1.0.jar
-      destination: mods/restrictedportals-1.15-1.0.jar
-    - url: https://media.forgecdn.net/files/2874/966/Morpheus-1.15.2-4.2.46.jar
-      destination: mods/Morpheus-1.15.2-4.2.46.jar
-    - url: https://media.forgecdn.net/files/2876/89/spark-forge.jar
-      destination: mods/spark-forge.jar
+  additionalFiles: ~
+    #- url: https://media.forgecdn.net/files/2844/278/restrictedportals-1.15-1.0.jar
+    #  destination: mods/restrictedportals-1.15-1.0.jar
+    #- url: https://media.forgecdn.net/files/2874/966/Morpheus-1.15.2-4.2.46.jar
+    #  destination: mods/Morpheus-1.15.2-4.2.46.jar
+    #- url: https://media.forgecdn.net/files/2876/89/spark-forge.jar
+    #  destination: mods/spark-forge.jar
 
   # For often there are config which the user wants to change, here is the place to put the local path to configs, jars or whatever
   # You can copy files or folders
@@ -176,34 +161,40 @@ launch:
 
   # Start File Name, variables: {{@loaderversion@}} and {{@mcversion@}}
   # This has to be the name the installer spits out
-  # For Forge 1.13: "forge-{{@mcversion@}}-{{@loaderversion@}}-universal.jar"
+  # For Forge 1.12-: "forge-{{@mcversion@}}-{{@loaderversion@}}-universal.jar"
+  # For Forge 1.13+: "forge-{{@mcversion@}}-{{@loaderversion@}}.jar"
   # For Fabric: "fabric-server-launch.jar"
-  startFile: "fabric-server-launch.jar"
+  startFile: "forge-{{@mcversion@}}-{{@loaderversion@}}.jar"
 
   # In case you have multiple javas installed you can add a absolute path to it here
   # The Path has to be enclosed in \" like in the example if it has spaces (or for safety just include them always.)
   # if the value is "", null, or ~ then 'java' from PATH is going to be used
   # Example: "\"C:/Program Files/Java/jre1.8.0_201/bin/java.exe\""
-  # It also supports replacing with environment variables with ${ENV_VAR} e.g. ${JAVA_HOME}/
-  forcedJavaPath: "\"${JAVA_HOME}/bin/java.exe\""
+  # It also supports replacing with environment variables with ${ENV_VAR} e.g. ${JAVA_HOME}/bin/java.exe
+  forcedJavaPath: ~
 
   # Java args that are supposed to be used when the server launches
   # keep in mind java args often need ' - ' in front of it to work, use clarifying parentheses to make sure it uses it correctly
   # Keep in mind that some arguments only work on JRE 1.8
+  # reference: https://aikar.co/2018/07/02/tuning-the-jvm-g1gc-garbage-collector-flags-for-minecraft/
   javaArgs:
-    - "-d64"
-    - "-server"
-    - "-XX:+AggressiveOpts"
-    - "-XX:ParallelGCThreads=3"
-    - "-XX:+UseConcMarkSweepGC"
+    - "-XX:+UseG1GC"
+    - "-XX:+ParallelRefProcEnabled"
+    - "-XX:MaxGCPauseMillis=200"
     - "-XX:+UnlockExperimentalVMOptions"
-    - "-XX:+UseParNewGC"
-    - "-XX:+ExplicitGCInvokesConcurrent"
-    - "-XX:MaxGCPauseMillis=10"
-    - "-XX:GCPauseIntervalMillis=50"
-    - "-XX:+UseFastAccessorMethods"
-    - "-XX:+OptimizeStringConcat"
-    - "-XX:NewSize=84m"
-    - "-XX:+UseAdaptiveGCBoundary"
-    - "-XX:NewRatio=3"
-    - "-Dfml.readTimeout=90"
+    - "-XX:+DisableExplicitGC"
+    - "-XX:+AlwaysPreTouch"
+    - "-XX:G1NewSizePercent=30"
+    - "-XX:G1MaxNewSizePercent=40"
+    - "-XX:G1HeapRegionSize=8M"
+    - "-XX:G1ReservePercent=20"
+    - "-XX:G1HeapWastePercent=5"
+    - "-XX:G1MixedGCCountTarget=4"
+    - "-XX:InitiatingHeapOccupancyPercent=15"
+    - "-XX:G1MixedGCLiveThresholdPercent=90"
+    - "-XX:G1RSetUpdatingPauseTimePercent=5"
+    - "-XX:SurvivorRatio=32"
+    - "-XX:+PerfDisableSharedMem"
+    - "-XX:MaxTenuringThreshold=1"
+    - "-Dfml.readTimeout=90"                        # servertimeout
+    - "-Dfml.queryResult=confirm"                   # auto /fmlconfirm
