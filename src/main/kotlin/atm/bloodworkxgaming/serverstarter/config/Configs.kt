@@ -56,14 +56,14 @@ data class LaunchSettings(
 
 @Serializable
 data class InstallConfig(
-    var mcVersion: String = "",
+    var mcVersion: String? = null,
 
-    var loaderVersion: String = "",
+    var loaderVersion: String? = null,
     var installerUrl: String = "",
     var installerArguments: List<String> = Collections.emptyList(),
 
-    var modpackUrl: String = "",
-    var modpackFormat: String = "",
+    var modpackUrl: String,
+    var modpackFormat: String,
 
     var formatSpecific: FormatSpecific = FormatSpecific(),
 
@@ -96,8 +96,8 @@ data class FormatSpecific(
 @Serializable
 data class ConfigFile(
     var _specver: Int = 0,
-    var modpack: ModpackConfig = ModpackConfig(),
-    var install: InstallConfig = InstallConfig(),
-    var launch: LaunchSettings = LaunchSettings()
+    var modpack: ModpackConfig,
+    var install: InstallConfig,
+    var launch: LaunchSettings
 )
 

@@ -24,8 +24,8 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 
 open class CursePackType(private val configFile: ConfigFile, internetManager: InternetManager) : AbstractZipbasedPackType(configFile, internetManager) {
-    private var forgeVersion: String = configFile.install.loaderVersion
-    private var mcVersion: String = configFile.install.mcVersion
+    private var forgeVersion: String? = configFile.install.loaderVersion
+    private var mcVersion: String? = configFile.install.mcVersion
     private val oldFiles = File(basePath + "OLD_TO_DELETE/")
 
     override fun cleanUrl(url: String): String {
@@ -41,7 +41,7 @@ open class CursePackType(private val configFile: ConfigFile, internetManager: In
      * @return String representation of the version
      */
     override fun getForgeVersion(): String {
-        return forgeVersion
+        return forgeVersion ?: throw IllegalStateException("Requesting Forge Version before it could been determined")
     }
 
     /**
@@ -50,7 +50,7 @@ open class CursePackType(private val configFile: ConfigFile, internetManager: In
      * @return String representation of the version
      */
     override fun getMCVersion(): String {
-        return mcVersion
+        return mcVersion ?: throw IllegalStateException("Requesting MC Version before it could been determined")
     }
 
     @Throws(IOException::class)
@@ -131,12 +131,12 @@ open class CursePackType(private val configFile: ConfigFile, internetManager: In
             LOGGER.info("manifest JSON Object: $json", true)
             val mcObj = json.getAsJsonObject("minecraft")
 
-            if (mcVersion.isEmpty()) {
+            if (mcVersion.isNullOrEmpty()) {
                 mcVersion = mcObj.getAsJsonPrimitive("version").asString
             }
 
             // gets the forge version
-            if (forgeVersion.isEmpty()) {
+            if (forgeVersion.isNullOrEmpty()) {
                 val loaders = mcObj.getAsJsonArray("modLoaders")
                 if (loaders.size() > 0) {
                     forgeVersion = loaders[0].asJsonObject.getAsJsonPrimitive("id").asString.substring(6)

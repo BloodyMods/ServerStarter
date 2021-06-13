@@ -17,10 +17,10 @@ install:
   mcVersion: 1.16.5
 
   # exact version of forge or fabric that is supposed to be used
-  # if this value is a null value so ( ~, null, or "" ) then the version from the mod pack is going to be used
-  loaderVersion: ~
+  # if this value is a null value so ( empty, null, or "" ) then the version from the mod pack is going to be used
+  loaderVersion:
 
-  # If a custom installer is supposed to used, specify the url here: (Otherwise put "", ~ or null here)
+  # If a custom installer is supposed to used, specify the url here: (Otherwise put "", empty or null here)
   # supports variables: {{@loaderversion@}} and {{@mcversion@}}
   # For forge: "https://files.minecraftforge.net/maven/net/minecraftforge/forge/{{@mcversion@}}-{{@loaderversion@}}/forge-{{@mcversion@}}-{{@loaderversion@}}-installer.jar"
   # For Fabric: "https://maven.fabricmc.net/net/fabricmc/fabric-installer/{{@loaderversion@}}/fabric-installer-{{@loaderversion@}}.jar"
@@ -76,7 +76,7 @@ install:
       - 428199
       - 431430
 
-  # The base path where the server should be installed to, ~ for current path
+  # The base path where the server should be installed to, leave it empty for current path
   baseInstallPath: setup/
 
   # a list of files which are supposed to be ignored when installing it from the client files
@@ -93,7 +93,7 @@ install:
   # often a server needs more files, which are nearly useless on the client, such as tickprofiler
   # This is a list of files, each ' - ' is a new file:
   # url is the directlink to the file, destination is the path to where the file should be copied to
-  additionalFiles: ~
+  additionalFiles:
     #- url: https://media.forgecdn.net/files/2844/278/restrictedportals-1.15-1.0.jar
     #  destination: mods/restrictedportals-1.15-1.0.jar
     #- url: https://media.forgecdn.net/files/2874/966/Morpheus-1.15.2-4.2.46.jar
@@ -110,10 +110,10 @@ install:
       to: setup/.
 
   # This makes the program check the folder for whether it is supposed to use the
-  checkFolder: yes
+  checkFolder: true
 
   # Whether to install the Loader (Forge or Fabric) or not, should always be yes/true unless you only want to install the pack
-  installLoader: yes
+  installLoader: true
 
   # Sponge bootstrapper jar URL
   # Only needed if you have spongefix enabled
@@ -132,15 +132,15 @@ install:
 # settings regarding the launching of the pack
 launch:
   # applies the launch wrapper to fix sponge for a few mods
-  spongefix: no
+  spongefix: false
 
   # Use a RAMDisk for the world folder
   # case-sensitive; use only lowercase `yes` or `no`
   # NOTE: The server must have run once fully before switching to `yes`!
-  ramDisk: no
+  ramDisk: false
 
   # checks with the help of a few unrelated server whether the server is online
-  checkOffline: yes
+  checkOffline: true
 
   # specifies the max amount of ram the server is supposed to launch with
   maxRam: 5G
@@ -149,7 +149,7 @@ launch:
   minRam: 2G
 
   # specifies whether the server is supposed to auto restart after crash
-  autoRestart: yes
+  autoRestart: true
 
   # after a given amount of crashes in a given time the server will stop auto restarting
   crashLimit: 10
@@ -160,7 +160,7 @@ launch:
 
   # Arguments that need to go before the 'java' argument, something like linux niceness
   # This is only a string, not a list.
-  preJavaArgs: ~
+  preJavaArgs:
 
   # Start File Name, variables: {{@loaderversion@}} and {{@mcversion@}}
   # This has to be the name the installer spits out
@@ -171,10 +171,10 @@ launch:
 
   # In case you have multiple javas installed you can add a absolute path to it here
   # The Path has to be enclosed in \" like in the example if it has spaces (or for safety just include them always.)
-  # if the value is "", null, or ~ then 'java' from PATH is going to be used
+  # if the value is "", null, empty then 'java' from PATH is going to be used
   # Example: "\"C:/Program Files/Java/jre1.8.0_201/bin/java.exe\""
   # It also supports replacing with environment variables with ${ENV_VAR} e.g. ${JAVA_HOME}/bin/java.exe
-  forcedJavaPath: ~
+  forcedJavaPath:
 
   # Java args that are supposed to be used when the server launches
   # keep in mind java args often need ' - ' in front of it to work, use clarifying parentheses to make sure it uses it correctly

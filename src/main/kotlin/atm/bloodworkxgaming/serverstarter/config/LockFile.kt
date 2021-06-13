@@ -12,7 +12,7 @@ data class LockFile(
     fun checkShouldInstall(configFile: ConfigFile): Boolean {
         return (!loaderInstalled
                 || !packInstalled
-                || configFile.install.loaderVersion.isNotEmpty() && loaderVersion != configFile.install.loaderVersion
+                || !configFile.install.loaderVersion.isNullOrEmpty() && loaderVersion != configFile.install.loaderVersion
                 || packUrl != configFile.install.modpackUrl)
     }
 }

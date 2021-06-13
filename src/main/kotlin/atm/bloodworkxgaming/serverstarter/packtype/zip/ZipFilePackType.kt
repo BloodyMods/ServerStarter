@@ -22,8 +22,8 @@ class ZipFilePackType(configFile: ConfigFile, internetManager: InternetManager) 
     override fun postProcessing() {
     }
 
-    private var forgeVersion: String = configFile.install.loaderVersion
-    private var mcVersion: String = configFile.install.mcVersion
+    private var forgeVersion: String = configFile.install.loaderVersion ?: throw IllegalArgumentException("Forge Version must be given for ZIP-Format")
+    private var mcVersion: String = configFile.install.mcVersion  ?: throw IllegalArgumentException("Forge Version must be given for ZIP-Format")
     private val oldFiles = File(basePath + "OLD_TO_DELETE/")
 
     override fun getForgeVersion(): String {
