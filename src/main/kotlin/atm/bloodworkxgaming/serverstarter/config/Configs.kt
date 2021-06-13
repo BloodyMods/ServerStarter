@@ -1,22 +1,28 @@
 package atm.bloodworkxgaming.serverstarter.config
 
+import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 import java.util.*
 
+@Serializable
 data class AdditionalFile(
     var url: String = "",
     var destination: String = ""
 )
 
+@Serializable
 data class LocalFile(
     var from: String = "",
     var to: String = ""
 )
 
+@Serializable
 data class ModpackConfig(
     var name: String = "",
     var description: String = ""
 )
 
+@Serializable
 data class LaunchSettings(
     var spongefix: Boolean = false,
     var ramDisk: Boolean = false,
@@ -48,6 +54,7 @@ data class LaunchSettings(
         }
 }
 
+@Serializable
 data class InstallConfig(
     var mcVersion: String = "",
 
@@ -57,12 +64,13 @@ data class InstallConfig(
 
     var modpackUrl: String = "",
     var modpackFormat: String = "",
-    var formatSpecific: Map<String, Any> = Collections.emptyMap(),
+
+    var formatSpecific: FormatSpecific = FormatSpecific(),
 
     var baseInstallPath: String = "",
-    var ignoreFiles: List<String> = Collections.emptyList(),
-    var additionalFiles: List<AdditionalFile> = Collections.emptyList(),
-    var localFiles: List<LocalFile> = Collections.emptyList(),
+    var ignoreFiles: List<String>? = null,
+    var additionalFiles: List<AdditionalFile>? = null,
+    var localFiles: List<LocalFile>? = null,
 
     var checkFolder: Boolean = false,
     var installLoader: Boolean = false,
@@ -75,13 +83,21 @@ data class InstallConfig(
 
     @Suppress("UNCHECKED_CAST")
     fun <T> getFormatSpecificSettingOrDefault(name: String, fallback: T?): T? {
-        return formatSpecific.getOrDefault(name, fallback) as T?
+        TODO()
+        // return formatSpecific.getOrDefault(name, fallback) as T?
     }
 }
 
+@Serializable
+data class FormatSpecific(
+    val ignoreProject: List<Int> = emptyList()
+)
+
+@Serializable
 data class ConfigFile(
     var _specver: Int = 0,
     var modpack: ModpackConfig = ModpackConfig(),
     var install: InstallConfig = InstallConfig(),
     var launch: LaunchSettings = LaunchSettings()
 )
+

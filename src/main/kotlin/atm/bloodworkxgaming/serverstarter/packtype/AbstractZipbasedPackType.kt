@@ -9,9 +9,13 @@ import java.nio.file.FileSystems
 import java.nio.file.PathMatcher
 import java.util.zip.ZipInputStream
 
+
 abstract class AbstractZipbasedPackType(private val configFile: ConfigFile, protected val internetManager: InternetManager) : IPackType {
     protected val basePath = configFile.install.baseInstallPath
 
+    /**
+     * Copies all files from the zip file into the install folder
+     */
     override fun installPack() {
         if (configFile.install.modpackUrl.isNotEmpty()) {
             val url = configFile.install.modpackUrl
@@ -19,14 +23,14 @@ abstract class AbstractZipbasedPackType(private val configFile: ConfigFile, prot
 
             try {
                 val patterns = configFile.install.ignoreFiles
-                        .map {
+                        ?.map {
                             val s = if (it.startsWith("glob:") || it.startsWith("regex:"))
                                 it
                             else
                                 "glob:$it"
 
                             FileSystems.getDefault().getPathMatcher(s)
-                        }
+                        } ?: emptyList()
 
                 handleZip(obtainZipFile(url), patterns)
                 postProcessing()

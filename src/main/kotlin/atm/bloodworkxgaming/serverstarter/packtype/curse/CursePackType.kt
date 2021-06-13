@@ -227,12 +227,10 @@ open class CursePackType(private val configFile: ConfigFile, internetManager: In
      */
     private fun processMods(mods: Collection<String>) {
         // constructs the ignore list
-        val ignorePatterns = ArrayList<Pattern>()
-        for (ignoreFile in configFile.install.ignoreFiles) {
-            if (ignoreFile.startsWith("mods/")) {
-                ignorePatterns.add(Pattern.compile(ignoreFile.substring(ignoreFile.lastIndexOf('/'))))
-            }
-        }
+        val ignorePatterns = configFile.install.ignoreFiles?.asSequence()
+            ?.filter { it.startsWith("mods/") }
+            ?.map { Pattern.compile(it.substring(it.lastIndexOf('/'))) }
+            ?.toList() ?: emptyList()
 
         // downloads the mods
         val count = AtomicInteger(0)

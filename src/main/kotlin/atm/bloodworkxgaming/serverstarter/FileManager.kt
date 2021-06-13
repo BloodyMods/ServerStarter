@@ -16,7 +16,9 @@ class FileManager(private val configFile: ConfigFile, private val internetManage
     fun installAdditionalFiles() {
         LOGGER.info("Starting to installing Additional Files")
         val fallbackList = mutableListOf<AdditionalFile>()
-        configFile.install.additionalFiles.parallelStream().forEach { file -> handleAdditionalFile(file, fallbackList) }
+        configFile.install.additionalFiles
+            ?.parallelStream()
+            ?.forEach { file -> handleAdditionalFile(file, fallbackList) }
 
         val failList = mutableListOf<AdditionalFile>()
         fallbackList.parallelStream().forEach { file -> handleAdditionalFile(file, failList) }
@@ -39,7 +41,7 @@ class FileManager(private val configFile: ConfigFile, private val internetManage
     fun installLocalFiles() {
         LOGGER.info("Starting to copy local files.")
 
-        for (localFile in configFile.install.localFiles) {
+        for (localFile in configFile.install.localFiles ?: return) {
             LOGGER.info("Copying local file: $localFile")
             try {
                 if (File(localFile.from).isDirectory) {

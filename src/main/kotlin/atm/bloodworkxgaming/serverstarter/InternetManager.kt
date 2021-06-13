@@ -3,6 +3,7 @@ package atm.bloodworkxgaming.serverstarter
 import atm.bloodworkxgaming.serverstarter.ServerStarter.Companion.LOGGER
 import atm.bloodworkxgaming.serverstarter.config.ConfigFile
 import okhttp3.OkHttpClient
+import okhttp3.Protocol
 import okhttp3.Request
 import okio.buffer
 import okio.sink
@@ -12,6 +13,7 @@ import java.util.concurrent.TimeUnit
 
 class InternetManager(private val configFile: ConfigFile) {
     val httpClient = OkHttpClient.Builder()
+        .protocols(listOf(Protocol.HTTP_1_1))
         .connectTimeout(configFile.install.connectTimeout, TimeUnit.SECONDS)
         .readTimeout(configFile.install.readTimeout, TimeUnit.SECONDS)
         .build()
