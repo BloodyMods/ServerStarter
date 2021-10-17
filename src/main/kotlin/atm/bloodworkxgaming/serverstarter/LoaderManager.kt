@@ -98,23 +98,20 @@ class LoaderManager(private val configFile: ConfigFile, private val internetMana
 
 
             if (lines.size > 2 && !lines[2].contains("true")) {
-                Scanner(System.`in`, "utf-8").use { scanner ->
+                LOGGER.info(ansi().fgCyan().a("You have not accepted the eula yet."))
+                LOGGER.info(
+                    ansi().fgCyan().a("By typing TRUE you are indicating your agreement to the EULA of Mojang.")
+                )
+                LOGGER.info(
+                    ansi().fgCyan()
+                        .a("Read it at https://account.mojang.com/documents/minecraft_eula before accepting it.")
+                )
 
-                    LOGGER.info(ansi().fgCyan().a("You have not accepted the eula yet."))
-                    LOGGER.info(
-                        ansi().fgCyan().a("By typing TRUE you are indicating your agreement to the EULA of Mojang.")
-                    )
-                    LOGGER.info(
-                        ansi().fgCyan()
-                            .a("Read it at https://account.mojang.com/documents/minecraft_eula before accepting it.")
-                    )
-
-                    val answer = scanner.nextLine()
-                    if (answer.trim().equals("true", ignoreCase = true)) {
-                        LOGGER.info("You have accepted the EULA.")
-                        lines[2] = "eula=true\n"
-                        FileUtils.writeLines(eulaFile, lines)
-                    }
+                val answer = readLine()
+                if (answer?.trim().equals("true", ignoreCase = true)) {
+                    LOGGER.info("You have accepted the EULA.")
+                    lines[2] = "eula=true\n"
+                    FileUtils.writeLines(eulaFile, lines)
                 }
             }
 
