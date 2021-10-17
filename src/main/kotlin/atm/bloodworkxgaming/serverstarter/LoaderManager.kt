@@ -197,7 +197,7 @@ class LoaderManager(private val configFile: ConfigFile, private val internetMana
                     props.load(it)
                 }
 
-                props["level-name"] as String
+                props["level-name"] as String?
             } catch (e: FileNotFoundException) {
                 "world"
             }
@@ -216,7 +216,9 @@ class LoaderManager(private val configFile: ConfigFile, private val internetMana
             val ramPostArguments = mutableListOf<String>()
 
             if (configFile.launch.ramDisk)
-                if (OSUtil.isLinux) {
+                if (levelName == null) {
+                     LOGGER.error("The level-name in the server.properties is empty, therefore we can't create a ramdisk")
+                }else if (OSUtil.isLinux) {
                     ramPreArguments.addAll(arrayOf("rsync", "-aAXv", "${levelName}_backup/", levelName))
                 } else {
                     LOGGER.warn("Windows does not support RAMDisk yet!")

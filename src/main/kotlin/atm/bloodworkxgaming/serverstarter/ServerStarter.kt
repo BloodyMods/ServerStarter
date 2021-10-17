@@ -127,7 +127,7 @@ class ServerStarter(args: Array<String>) {
 
             info(ansi().fgRed().a(":::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::"))
             info(ansi().fgBrightBlue().a("   Minecraft ServerStarter install/launcher jar"))
-            info(ansi().fgBrightBlue().a("   (Created by ").fgGreen().a("BloodWorkXGaming").fgBrightBlue().a(" with the help of ").fgGreen().a("\"Team RAM\"").fgBrightBlue().a(")"))
+            info(ansi().fgBrightBlue().a("   (Created by ").fgGreen().a("BloodWorkXGaming").fgBrightBlue().a(" with the help of ").fgGreen().a("Contributors").fgBrightBlue().a(")"))
             info(ansi().fgRed().a(":::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::"))
             info("")
             info("   This jar will launch a Minecraft Forge/Fabric Modded server")
