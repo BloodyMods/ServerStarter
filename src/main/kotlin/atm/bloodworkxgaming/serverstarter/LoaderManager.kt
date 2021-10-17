@@ -71,7 +71,6 @@ class LoaderManager(private val configFile: ConfigFile, private val internetMana
                 } catch (e: InterruptedException) {
                     e.printStackTrace()
                 }
-
             }
 
         } while (shouldRestart)
@@ -183,6 +182,7 @@ class LoaderManager(private val configFile: ConfigFile, private val internetMana
             internetManager.downloadToFile(configFile.install.spongeBootstrapper, downloadFile)
         } catch (e: IOException) {
             LOGGER.error("Error while downloading bootstrapper", e)
+            throw e
         }
 
         return filename
@@ -199,7 +199,7 @@ class LoaderManager(private val configFile: ConfigFile, private val internetMana
 
                 props["level-name"] as String?
             } catch (e: FileNotFoundException) {
-                "world"
+                null
             }
 
             val filename =

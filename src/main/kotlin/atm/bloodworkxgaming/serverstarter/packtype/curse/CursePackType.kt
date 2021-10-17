@@ -117,6 +117,7 @@ open class CursePackType(private val configFile: ConfigFile, internetManager: In
             }
         } catch (e: IOException) {
             LOGGER.error("Could not unzip files", e)
+            throw e
         }
 
         LOGGER.info("Done unzipping the files.")

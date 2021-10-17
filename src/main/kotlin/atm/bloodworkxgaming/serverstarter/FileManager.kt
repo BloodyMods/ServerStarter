@@ -20,6 +20,9 @@ class FileManager(private val configFile: ConfigFile, private val internetManage
 
         val failList = mutableListOf<AdditionalFile>()
         fallbackList.parallelStream().forEach { file -> handleAdditionalFile(file, failList) }
+        if (failList.isNotEmpty()) {
+            throw RuntimeException("Could not download all additional files! [$failList]")
+        }
     }
 
     private fun handleAdditionalFile(file: AdditionalFile, fallbackList: MutableList<AdditionalFile>) {
@@ -49,6 +52,7 @@ class FileManager(private val configFile: ConfigFile, private val internetManage
                 }
             } catch (e: IOException) {
                 LOGGER.error("Error while copying local file", e)
+                throw e
             }
         }
     }
