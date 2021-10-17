@@ -25,6 +25,7 @@ data class LaunchSettings(
     var minRam: String = "",
 
     var startFile: String = "",
+    var startCommand: List<String> = Collections.emptyList(),
     var javaArgs: List<String> = Collections.emptyList(),
     var autoRestart: Boolean = false,
     var crashLimit: Int = 0,

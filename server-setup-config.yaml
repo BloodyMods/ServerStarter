@@ -14,11 +14,11 @@ modpack:
 # settings regarding the installation of the modpack
 install:
   # version of minecraft, needs the exact version
-  mcVersion: 1.16.5
+  mcVersion: 1.17.1
 
   # exact version of forge or fabric that is supposed to be used
   # if this value is a null value so ( ~, null, or "" ) then the version from the mod pack is going to be used
-  loaderVersion: ~
+  loaderVersion: 37.0.95
 
   # If a custom installer is supposed to used, specify the url here: (Otherwise put "", ~ or null here)
   # supports variables: {{@loaderversion@}} and {{@mcversion@}}
@@ -42,7 +42,7 @@ install:
 
   # Link to where the file where the modpack can be distributed
   # This supports loading from local files as well for most pack types if there is file://{PathToFile} in the beginning
-  modpackUrl: https://media.forgecdn.net/files/3315/528/All+the+Mods+6-1.6.4.zip
+  modpackUrl: https://media.forgecdn.net/files/3491/186/All+the+Mods+7-0.0.21.zip
 
   # This is used to specify in which format the modpack is distributed, the server launcher has to handle each individually if their format differs
   # current supported formats:
@@ -169,6 +169,18 @@ launch:
   # For Fabric: "fabric-server-launch.jar"
   startFile: "forge-{{@mcversion@}}-{{@loaderversion@}}.jar"
 
+  # This is the command how the server is supposed to be started
+  # For <1.16 it should be
+  #  - "-jar"
+  #  - "{{@startFile@}}"
+  #  - "nogui"
+  # For >=1.17 it should be
+  # - "@libraries/net/minecraftforge/forge/{{@mcversion@}}-{{@loaderversion@}}/{{@os@}}_args.txt"
+  # - "nogui"
+  startCommand:
+    - "@libraries/net/minecraftforge/forge/{{@mcversion@}}-{{@loaderversion@}}/{{@os@}}_args.txt"
+    - "nogui"
+
   # In case you have multiple javas installed you can add a absolute path to it here
   # The Path has to be enclosed in \" like in the example if it has spaces (or for safety just include them always.)
   # if the value is "", null, or ~ then 'java' from PATH is going to be used
@@ -181,23 +193,23 @@ launch:
   # Keep in mind that some arguments only work on JRE 1.8
   # reference: https://aikar.co/2018/07/02/tuning-the-jvm-g1gc-garbage-collector-flags-for-minecraft/
   javaArgs:
-    - "-XX:+UseG1GC"
-    - "-XX:+ParallelRefProcEnabled"
-    - "-XX:MaxGCPauseMillis=200"
-    - "-XX:+UnlockExperimentalVMOptions"
-    - "-XX:+DisableExplicitGC"
-    - "-XX:+AlwaysPreTouch"
-    - "-XX:G1NewSizePercent=30"
-    - "-XX:G1MaxNewSizePercent=40"
-    - "-XX:G1HeapRegionSize=8M"
-    - "-XX:G1ReservePercent=20"
-    - "-XX:G1HeapWastePercent=5"
-    - "-XX:G1MixedGCCountTarget=4"
-    - "-XX:InitiatingHeapOccupancyPercent=15"
-    - "-XX:G1MixedGCLiveThresholdPercent=90"
-    - "-XX:G1RSetUpdatingPauseTimePercent=5"
-    - "-XX:SurvivorRatio=32"
-    - "-XX:+PerfDisableSharedMem"
-    - "-XX:MaxTenuringThreshold=1"
-    - "-Dfml.readTimeout=90"                        # servertimeout
-    - "-Dfml.queryResult=confirm"                   # auto /fmlconfirm
+    # - "-XX:+UseG1GC"
+    # - "-XX:+ParallelRefProcEnabled"
+    # - "-XX:MaxGCPauseMillis=200"
+    # - "-XX:+UnlockExperimentalVMOptions"
+    # - "-XX:+DisableExplicitGC"
+    # - "-XX:+AlwaysPreTouch"
+    # - "-XX:G1NewSizePercent=30"
+    # - "-XX:G1MaxNewSizePercent=40"
+    # - "-XX:G1HeapRegionSize=8M"
+    # - "-XX:G1ReservePercent=20"
+    # - "-XX:G1HeapWastePercent=5"
+    # - "-XX:G1MixedGCCountTarget=4"
+    # - "-XX:InitiatingHeapOccupancyPercent=15"
+    # - "-XX:G1MixedGCLiveThresholdPercent=90"
+    # - "-XX:G1RSetUpdatingPauseTimePercent=5"
+    # - "-XX:SurvivorRatio=32"
+    # - "-XX:+PerfDisableSharedMem"
+    # - "-XX:MaxTenuringThreshold=1"
+    # - "-Dfml.readTimeout=90"                        # servertimeout
+    # - "-Dfml.queryResult=confirm"                   # auto /fmlconfirm
