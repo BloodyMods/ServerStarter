@@ -128,7 +128,7 @@ open class CursePackType(private val configFile: ConfigFile, internetManager: In
         val mods = ArrayList<ModEntryRaw>()
 
         InputStreamReader(FileInputStream(File(basePath + "manifest.json")), "utf-8").use { reader ->
-            val json = JsonParser().parse(reader).asJsonObject
+            val json = JsonParser.parseReader(reader).asJsonObject
             LOGGER.info("manifest JSON Object: $json", true)
             val mcObj = json.getAsJsonObject("minecraft")
 
@@ -178,7 +178,7 @@ open class CursePackType(private val configFile: ConfigFile, internetManager: In
 
         val urls = ConcurrentLinkedQueue<String>()
 
-        LOGGER.info("Requesting Download links from cursemeta.")
+        LOGGER.info("Requesting download links from CurseForge.")
 
         mods.parallelStream().forEach { mod ->
             if (ignoreSet.isNotEmpty() && ignoreSet.contains(mod.projectID)) {
@@ -186,14 +186,13 @@ open class CursePackType(private val configFile: ConfigFile, internetManager: In
                 return@forEach
             }
 
-            val url = (configFile.install.getFormatSpecificSettingOrDefault("cursemeta", "https://cursemeta.dries007.net")
-                    + "/" + mod.projectID + "/" + mod.fileID + ".json")
+            val url = "https://addons-ecs.forgesvc.net/api/v2/addon/${mod.projectID}/file/${mod.fileID}"
             LOGGER.info("Download url is: $url", true)
 
             try {
                 val request = Request.Builder()
                         .url(url)
-                        .header("User-Agent", "All the mods server installer.")
+                        .header("User-Agent", "All The Mods server installer.")
                         .header("Content-Type", "application/json")
                         .build()
 
@@ -203,14 +202,14 @@ open class CursePackType(private val configFile: ConfigFile, internetManager: In
                     throw IOException("Request to $url was not successful.")
                 val body = res.body ?: throw IOException("Request to $url returned a null body.")
 
-                val jsonRes = JsonParser().parse(body.string()).asJsonObject
+                val jsonRes = JsonParser.parseString(body.string()).asJsonObject
                 LOGGER.info("Response from manifest query: $jsonRes", true)
 
                 urls.add(jsonRes
                         .asJsonObject
-                        .getAsJsonPrimitive("DownloadURL").asString)
+                        .getAsJsonPrimitive("downloadUrl").asString)
             } catch (e: IOException) {
-                LOGGER.error("Error while trying to get URL from cursemeta for mod $mod", e)
+                LOGGER.error("Error while trying to get URL from CurseForge for mod $mod", e)
             }
         }
 
