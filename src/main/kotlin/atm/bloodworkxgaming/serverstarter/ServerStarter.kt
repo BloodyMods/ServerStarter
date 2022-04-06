@@ -198,7 +198,12 @@ class ServerStarter(args: Array<String>) {
 
 fun main(args: Array<String>) {
     // System.setProperty("jansi.passthrough", "true")
-    AnsiConsole.systemInstall()
+    try {
+        AnsiConsole.systemInstall()
+    } catch (e: Exception) {
+        println("jansi couldn't be installed in this terminal (e.g. due to aarch64 not being supported)\n" +
+                "Future terminal messages will have no color.")
+    }
 
     try {
         val starter = ServerStarter(args)
