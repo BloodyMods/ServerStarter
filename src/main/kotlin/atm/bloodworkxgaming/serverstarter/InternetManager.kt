@@ -22,7 +22,7 @@ class InternetManager(private val configFile: ConfigFile) {
     fun checkConnection(): Boolean {
         var reached = 0
 
-        val urls = listOf("http://example.com", "http://google.com")
+        val urls = configFile.launch.checkUrls
         for (url in urls) {
             try {
                 LOGGER.info("Testing $url.")

@@ -142,6 +142,12 @@ launch:
   # checks with the help of a few unrelated server whether the server is online
   checkOffline: true
 
+  # These servers are going to be checked:
+  checkUrls:
+    - https://github.com/
+    - https://www.curseforge.com/
+    - https://cursemeta.dries007.net/
+
   # specifies the max amount of ram the server is supposed to launch with
   maxRam: 5G
 
@@ -187,6 +193,12 @@ launch:
   # Example: "\"C:/Program Files/Java/jre1.8.0_201/bin/java.exe\""
   # It also supports replacing with environment variables with ${ENV_VAR} e.g. ${JAVA_HOME}/bin/java.exe
   forcedJavaPath: ~
+
+  # If you aren't sure what the java path is you can let serverstarter attempt to find the correct JVM
+  # For this you need to have all available JVMs on the PATH
+  # -> MC 1.12 requires java [8, 9, 10, 11]
+  # -> MC 1.17 requires java [17]
+  supportedJavaVersions: [17]
 
   # Java args that are supposed to be used when the server launches
   # keep in mind java args often need ' - ' in front of it to work, use clarifying parentheses to make sure it uses it correctly

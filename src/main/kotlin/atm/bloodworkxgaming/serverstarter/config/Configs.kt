@@ -21,6 +21,7 @@ data class LaunchSettings(
     var spongefix: Boolean = false,
     var ramDisk: Boolean = false,
     var checkOffline: Boolean = false,
+    var checkUrls: List<String> = Collections.emptyList(),
     var maxRam: String = "",
     var minRam: String = "",
 
@@ -33,6 +34,8 @@ data class LaunchSettings(
     var preJavaArgs: String = "",
 
     var forcedJavaPath: String = "",
+
+    var supportedJavaVersions: List<String> = Collections.emptyList()
 
     ) {
     val processedForcedJavaPath: String

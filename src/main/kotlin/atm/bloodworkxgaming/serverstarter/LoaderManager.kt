@@ -228,8 +228,9 @@ class LoaderManager(private val configFile: ConfigFile, private val internetMana
                 arguments.addAll(configFile.launch.preJavaArgs.trim().split(' ').dropWhile { it.isEmpty() })
             }
 
-            val java =
-                if (configFile.launch.forcedJavaPath.isEmpty()) "java" else configFile.launch.processedForcedJavaPath
+
+            val java = getEffectiveJavaPath()
+
             val processedArguments = configFile.launch.javaArgs.map(::replacePlaceholders)
 
             arguments.add(java)
@@ -249,7 +250,6 @@ class LoaderManager(private val configFile: ConfigFile, private val internetMana
                 } catch (e: NumberFormatException) {
                     LOGGER.error("Problem while calculating XMS", e)
                 }
-
             }
 
             // Construct the actual launch command
@@ -291,6 +291,48 @@ class LoaderManager(private val configFile: ConfigFile, private val internetMana
     }
 
     /**
+     * Finds the correct java path depending on the config, either:
+     * 1. Forced java path
+     * 2. correct jvm version on the $PATH
+     * 3. 'java'
+     */
+    private fun getEffectiveJavaPath() = when {
+        configFile.launch.forcedJavaPath.isNotBlank() -> configFile.launch.processedForcedJavaPath
+        configFile.launch.supportedJavaVersions.isNotEmpty() -> {
+            // Find the best suitable java version
+            LOGGER.info("Attempting to find suitable jvm for supported version ${configFile.launch.supportedJavaVersions}")
+
+            val command = if (OSUtil.isWindows) {
+                arrayOf("where", "java")
+            } else {
+                arrayOf("which -a java")
+            }
+
+            val path = Runtime.getRuntime().exec(command )
+                .inputReader()
+                .readLines()
+                .firstOrNull { path ->
+                    val text = Runtime.getRuntime().exec(arrayOf(path, "-version"))
+                        .errorReader()
+                        .readText()
+                    configFile.launch.supportedJavaVersions
+                        .any { text.contains(Regex("\"(1\\.)?${it}")) }
+                }
+
+            if (path == null) {
+                LOGGER.warn("Couldn't find any JVM installation matching the supported versions, falling back to 'java', but this might fail.")
+                "java"
+            } else {
+                LOGGER.info("Found suitable JVM at path $path.")
+                path.replace("\\", "/")
+            }
+        }
+        else -> "java"
+    }
+
+
+
+    /**
      * Replaces all custom variables in supported strings
      */
     private fun replacePlaceholders(s: String): String = s
@@ -300,6 +342,8 @@ class LoaderManager(private val configFile: ConfigFile, private val internetMana
 
 
     private fun startAndWaitForProcess(args: List<String>) {
+        println(args.joinToString() { "\"$it\"" })
+
         ProcessBuilder(args).apply {
             inheritIO()
             directory(File(configFile.install.baseInstallPath + "."))

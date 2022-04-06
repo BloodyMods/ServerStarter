@@ -147,8 +147,9 @@ class ServerStarter(args: Array<String>) {
         val internetManager = InternetManager(config)
 
         if (!internetManager.checkConnection() && config.launch.checkOffline) {
-            LOGGER.error("Problems with the Internet connection, shutting down.")
-            exitProcess(-1)
+            LOGGER.error("Problems with the Internet connection, please check your connection!\n" +
+                    "This could however be a problem with the servers as well.\n" +
+                    "Continuing to download, but this may fail!")
         }
 
 
