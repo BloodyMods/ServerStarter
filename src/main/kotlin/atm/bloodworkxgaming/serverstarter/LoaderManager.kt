@@ -323,11 +323,13 @@ class LoaderManager(private val configFile: ConfigFile, private val internetMana
             }
 
             val path = Runtime.getRuntime().exec(command )
-                .inputReader()
+                .inputStream
+                .bufferedReader()
                 .readLines()
                 .firstOrNull { path ->
                     val text = Runtime.getRuntime().exec(arrayOf(path, "-version"))
-                        .errorReader()
+                        .errorStream
+                        .bufferedReader()
                         .readText()
                     configFile.launch.supportedJavaVersions
                         .any { text.contains(Regex("\"(1\\.)?${it}")) }
