@@ -196,7 +196,7 @@ launch:
 
   # If you aren't sure what the java path is you can let serverstarter attempt to find the correct JVM
   # For this you need to have all available JVMs on the PATH
-  # -> MC 1.12 requires java [8, 9, 10, 11]
+  # -> MC 1.12 to 1.16 requires java [8, 9, 10, 11]
   # -> MC 1.17 requires java [17]
   supportedJavaVersions: [17]
 
