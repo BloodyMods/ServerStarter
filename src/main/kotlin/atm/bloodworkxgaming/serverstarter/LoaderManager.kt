@@ -15,11 +15,25 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.util.*
+import kotlin.concurrent.thread
 import kotlin.math.max
 
 class DownloadLoaderException(message: String, exception: Exception) : IOException(message, exception)
 
 class LoaderManager(private val configFile: ConfigFile, private val internetManager: InternetManager) {
+    private val runningProcesses = mutableListOf<Process>()
+    init {
+        setupShutdownHook()
+    }
+
+    private fun setupShutdownHook() {
+        Runtime.getRuntime().addShutdownHook(thread(start = false) {
+            LOGGER.warn("Shutdown Hook called, trying to stop any running subprocess.")
+            for (runningProcess in runningProcesses) {
+                runningProcess.destroy()
+            }
+        })
+    }
 
     fun handleServer() {
         val startTimes = ArrayList<LocalDateTime>()
@@ -342,12 +356,12 @@ class LoaderManager(private val configFile: ConfigFile, private val internetMana
 
 
     private fun startAndWaitForProcess(args: List<String>) {
-        println(args.joinToString() { "\"$it\"" })
-
         ProcessBuilder(args).apply {
             inheritIO()
             directory(File(configFile.install.baseInstallPath + "."))
             start().apply {
+                runningProcesses.add(this)
+
                 waitFor()
                 outputStream.close()
                 errorStream.close()
