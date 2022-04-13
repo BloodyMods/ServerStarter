@@ -310,7 +310,7 @@ class LoaderManager(private val configFile: ConfigFile, private val internetMana
      * 2. correct jvm version on the $PATH
      * 3. 'java'
      */
-    private fun getEffectiveJavaPath() = when {
+    private fun getEffectiveJavaPath(): String = when {
         configFile.launch.forcedJavaPath.isNotBlank() -> configFile.launch.processedForcedJavaPath
         configFile.launch.supportedJavaVersions.isNotEmpty() -> {
             // Find the best suitable java version
@@ -319,28 +319,32 @@ class LoaderManager(private val configFile: ConfigFile, private val internetMana
             val command = if (OSUtil.isWindows) {
                 arrayOf("where", "java")
             } else {
-                arrayOf("which -a java")
+                arrayOf("which", "-a", "java")
             }
+            try {
+                val path = Runtime.getRuntime().exec(command )
+                    .inputStream
+                    .bufferedReader()
+                    .readLines()
+                    .firstOrNull { path ->
+                        val text = Runtime.getRuntime().exec(arrayOf(path, "-version"))
+                            .errorStream
+                            .bufferedReader()
+                            .readText()
+                        configFile.launch.supportedJavaVersions
+                            .any { text.contains(Regex("\"(1\\.)?${it}")) }
+                    }
 
-            val path = Runtime.getRuntime().exec(command )
-                .inputStream
-                .bufferedReader()
-                .readLines()
-                .firstOrNull { path ->
-                    val text = Runtime.getRuntime().exec(arrayOf(path, "-version"))
-                        .errorStream
-                        .bufferedReader()
-                        .readText()
-                    configFile.launch.supportedJavaVersions
-                        .any { text.contains(Regex("\"(1\\.)?${it}")) }
+                if (path == null) {
+                    LOGGER.warn("Couldn't find any JVM installation matching the supported versions, falling back to 'java', but this might fail.")
+                    "java"
+                } else {
+                    LOGGER.info("Found suitable JVM at path $path.")
+                    path.replace("\\", "/")
                 }
-
-            if (path == null) {
-                LOGGER.warn("Couldn't find any JVM installation matching the supported versions, falling back to 'java', but this might fail.")
+            } catch (e: Exception) {
+                LOGGER.error("Couldn't find jvm, falling back to 'java'", e)
                 "java"
-            } else {
-                LOGGER.info("Found suitable JVM at path $path.")
-                path.replace("\\", "/")
             }
         }
         else -> "java"
