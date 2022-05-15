@@ -178,6 +178,11 @@ launch:
   startFile: "forge-{{@mcversion@}}-{{@loaderversion@}}.jar"
 
   # This is the command how the server is supposed to be started
+  # All arguments must be separate entries, including options and their values.
+  # For example, "--fml.modLists pathToModListFile" should be:
+  #  - "--fml.modLists"
+  #  - "pathToModListFile"
+  #
   # For <1.16 it should be
   #  - "-jar"
   #  - "{{@startFile@}}"
