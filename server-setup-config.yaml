@@ -47,6 +47,8 @@ install:
 
   # Link to where the file where the modpack can be distributed
   # This supports loading from local files as well for most pack types if there is file://{PathToFile} in the beginning
+  # Note: file://{PathToFile} does not need the full path, can be a relative path.
+  # E.g: modpackUrl: file://../modpacks/All+the+Mods+7-0.0.21.zip
   modpackUrl: https://media.forgecdn.net/files/3491/186/All+the+Mods+7-0.0.21.zip
 
   # This is used to specify in which format the modpack is distributed, the server launcher has to handle each individually if their format differs
@@ -181,6 +183,11 @@ launch:
   startFile: "forge-{{@mcversion@}}-{{@loaderversion@}}.jar"
 
   # This is the command how the server is supposed to be started
+  # All arguments must be separate entries, including options and their values.
+  # For example, "--fml.modLists pathToModListFile" should be:
+  #  - "--fml.modLists"
+  #  - "pathToModListFile"
+  #
   # For <1.16 it should be
   #  - "-jar"
   #  - "{{@startFile@}}"
