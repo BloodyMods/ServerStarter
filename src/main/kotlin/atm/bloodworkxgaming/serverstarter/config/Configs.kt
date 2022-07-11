@@ -2,6 +2,20 @@ package atm.bloodworkxgaming.serverstarter.config
 
 import java.util.*
 
+fun processString(s: String): String {
+        var str = s
+        val regex = Regex("\\\$\\{(.+)}")
+        for (matchResult in regex.findAll(str)) {
+            val res = matchResult.groupValues.getOrNull(0) ?: continue
+            val inner = matchResult.groupValues.getOrNull(1) ?: continue
+
+            str = str.replace(res, System.getenv(inner) ?: throw java.lang.Exception("There is no Environment Variable '$inner'"))
+        }
+
+        return str
+
+}
+
 data class AdditionalFile(
     var url: String = "",
     var destination: String = ""
@@ -39,20 +53,12 @@ data class LaunchSettings(
 
     ) {
     val processedForcedJavaPath: String
-        get() {
-            var str = forcedJavaPath
-            val regex = Regex("\\\$\\{(.+)}")
-            for (matchResult in regex.findAll(forcedJavaPath)) {
-                val res = matchResult.groupValues.getOrNull(0) ?: continue
-                val inner = matchResult.groupValues.getOrNull(1) ?: continue
-                str = str.replace(res, System.getenv(inner))
-            }
-
-            return str
-        }
+        get() = processString(forcedJavaPath)
 }
 
 data class InstallConfig(
+    var curseForgeApiKey: String = "",
+
     var mcVersion: String = "",
 
     var loaderVersion: String = "",
@@ -88,4 +94,8 @@ data class ConfigFile(
     var modpack: ModpackConfig = ModpackConfig(),
     var install: InstallConfig = InstallConfig(),
     var launch: LaunchSettings = LaunchSettings()
-)
+) {
+    fun postProcess() {
+        install.curseForgeApiKey = processString(install.curseForgeApiKey)
+    }
+}

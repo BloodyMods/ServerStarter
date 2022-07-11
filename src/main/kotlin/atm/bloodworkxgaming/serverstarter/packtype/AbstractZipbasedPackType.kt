@@ -32,6 +32,7 @@ abstract class AbstractZipbasedPackType(private val configFile: ConfigFile, prot
                 postProcessing()
             } catch (e: IOException) {
                 ServerStarter.LOGGER.error("Error while installing pack", e)
+                throw e
             }
         }
     }

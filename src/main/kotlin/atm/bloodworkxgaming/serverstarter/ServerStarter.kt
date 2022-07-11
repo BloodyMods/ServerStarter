@@ -75,6 +75,8 @@ class ServerStarter(args: Array<String>) {
             if (file == null)
                 throw RuntimeException("Config file was null while reading.")
 
+            file.postProcess()
+
             return file
         }
 

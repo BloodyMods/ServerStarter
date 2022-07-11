@@ -13,6 +13,11 @@ modpack:
 
 # settings regarding the installation of the modpack
 install:
+  # Curse Forge requires an API Token to access the API and to allow for downloading files.
+  # This field supports using an Environment Variable like ${CURSE_FORGE_API_KEY} to decrease the risk of sharing the API-Key by mistake
+  # To Modpack authors: You can enter your own API-Key here, but do that on your own risk.
+  curseForgeApiKey: "${CURSE_FORGE_API_KEY}"
+
   # version of minecraft, needs the exact version
   mcVersion: 1.17.1
 
