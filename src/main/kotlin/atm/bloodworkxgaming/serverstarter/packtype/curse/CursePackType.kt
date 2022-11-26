@@ -240,11 +240,62 @@ open class CursePackType(private val configFile: ConfigFile, internetManager: In
                     ignoreSet.add(o.toString())
             }
 
-        val urls = requestModInformation(mods, ignoreSet)
+
+        val urls = ConcurrentLinkedQueue<String>()
+
+        LOGGER.info("Requesting Download links from cursemeta.")
+
+        mods.parallelStream().forEach { mod ->
+            if (ignoreSet.isNotEmpty() && ignoreSet.contains(mod.projectID)) {
+                LOGGER.info("Skipping mod with projectID: " + mod.projectID)
+                return@forEach
+            }
+
+            val url = "https://api.cfwidget.com/${mod.projectID}?version=${mod.fileID}"
+            LOGGER.info("Download url is: $url", true)
+
+            try {
+                val request = Request.Builder()
+                        .url(url)
+                        .header("User-Agent", "All the mods server installer.")
+                        .header("Content-Type", "application/json")
+                        .build()
+
+                val res = InternetManager.httpClient.newCall(request).execute()
+
+                if (!res.isSuccessful)
+                    throw IOException("Request to $url was not successful.")
+                val body = res.body ?: throw IOException("Request to $url returned a null body.")
+                try {
+                    val jsonRes = JsonParser().parse(body.string()).asJsonObject
+                    LOGGER.info("Response from manifest query: $jsonRes", true)
+                    var arr = jsonRes.asJsonObject.getAsJsonObject("download");
+                    var part1 = mod.fileID.subSequence(0, 4).toString();
+                    var part2 = mod.fileID.split(part1)[1];
+                    val regx = "^0+\$".toRegex();
+                    if(!regx.containsMatchIn(part2))
+                        part2 = part2.replace("^0*".toRegex(),"");
+                    else
+                        part2 = "0";
+                    var url = "https://mediafilez.forgecdn.net/files/$part1/$part2/${arr["name"].asString.replace("+","%2B")}"
+                    LOGGER.info(url)
+                    urls.add(url)
+                }
+                catch(e:Exception)
+                {
+
+                }
+
+
+            } catch (e: IOException) {
+                LOGGER.error("Error while trying to get URL from cursemeta for mod $mod", e)
+            }
+        }
 
         LOGGER.info("Mods to download: $urls", true)
 
         processMods(urls)
+
     }
 
     /**
