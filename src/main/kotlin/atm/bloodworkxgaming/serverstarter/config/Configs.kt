@@ -57,6 +57,7 @@ data class LaunchSettings(
 }
 
 data class InstallConfig(
+    var curseForgeUrl: String = "",
     var curseForgeApiKey: String = "",
 
     var mcVersion: String = "",

@@ -191,7 +191,7 @@ open class CursePackType(private val configFile: ConfigFile, internetManager: In
         LOGGER.info("Request Body: $bodyJson", true)
 
 
-        val url = "https://api.curseforge.com/v1/mods/files"
+        val url = configFile.install.curseForgeUrl; // "https://api.curseforge.com/v1/mods/files"
         val request = Request.Builder()
             .url(url)
             .header("Content-Type", "application/json")
